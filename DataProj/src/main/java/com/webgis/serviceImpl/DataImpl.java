@@ -3,12 +3,12 @@ package com.webgis.serviceImpl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.webgis.ResponseInfo;
 import com.webgis.entity.EnumErrCode;
+import com.webgis.entity.Info.ScenicInfo;
 import com.webgis.entity.Info.SearchInfo;
 import com.webgis.entity.ScenicEntity;
 import com.webgis.mapper.ScenicMapper;
 import com.webgis.service.DataService;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.statement.select.Limit;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -34,35 +34,50 @@ public class DataImpl implements DataService {
 
         try {
             List<ScenicEntity> scenicEntity = scenicMapper.selectList(qw);
-            Map<String, Integer> map = getPage(scenicEntity.size(), 1);
 
-            List<ScenicEntity> ScInfos = new ArrayList<>();
-            int count = 0;
-            int minCount = map.get("min");
-            int maxCount = map.get("max");
-            for (ScenicEntity entity : scenicEntity) {
-                count++;
-                if (count > minCount && count <= maxCount) {
-                    ScenicEntity scInfo = new ScenicEntity();
-                    scInfo.message = entity.getMessage();
-                    scInfo.address = entity.getAddress();
-                    scInfo.name = entity.getName();
-                    ScInfos.add(scInfo);
-                }
-            }
+            /**
+             * 此处取消分页
+             */
+//            Map<String, Integer> map = getPage(scenicEntity.size(), 1);
+//
+//            List<ScenicInfo> ScInfos = new ArrayList<>();
+//            int count = 0;
+//            int minCount = map.get("min");
+//            int maxCount = map.get("max");
+//            for (ScenicEntity entity : scenicEntity) {
+//                count++;
+//                if (count > minCount && count <= maxCount) {
+//                    ScenicInfo scInfo = new ScenicInfo();
+//                    scInfo.message = entity.getMessage();
+//                    scInfo.address = entity.getAddress();
+//                    scInfo.name = entity.getName();
+//                    scInfo.X = entity.getX();
+//                    scInfo.Y = entity.getY();
+//                    scInfo.id = entity.getId();
+//                    ScInfos.add(scInfo);
+//                }
+//            }
+//
+//            SearchInfo searchInfo = new SearchInfo();
+//            searchInfo.setTotal(scenicEntity.size());
+//            searchInfo.setScInfo(ScInfos);
+//            searchInfo.setPages(map.get("pages"));
 
-            SearchInfo searchInfo = new SearchInfo();
-            searchInfo.setTotal(scenicEntity.size());
-            searchInfo.setScInfo(ScInfos);
-            searchInfo.setPages(map.get("pages"));
-
-            return new ResponseInfo(EnumErrCode.OK, searchInfo);
+            return new ResponseInfo(EnumErrCode.OK, scenicEntity);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
         }
     }
 
+    /**
+     * 分页 传入当前页数及要素个数
+     * 返回最大值、最小值、及页面总数
+     *
+     * @param size
+     * @param pagenum
+     * @return
+     */
     public Map<String, Integer> getPage(int size, int pagenum) {
         //符合条件要素个数
         int featureCount = size;

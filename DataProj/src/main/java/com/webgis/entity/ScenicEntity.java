@@ -23,12 +23,14 @@ public class ScenicEntity {
     public String address;
 
     @TableField("X")
-    public String X;
+    public String x;
 
     @TableField("Y")
-    public String Y;
+    public String y;
 
     @TableField("jianjie")
     public String message;
+
+    public int id;
 
 }

@@ -9,5 +9,5 @@ import java.util.List;
 public class SearchInfo {
     public int pages;
     public int total;
-    public List<ScenicEntity> ScInfo;
+    public List<ScenicInfo> ScInfo;
 }
