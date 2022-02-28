@@ -10,9 +10,10 @@ public class ScenicInfo {
     public String message;
 
     @JsonProperty("x")
-    public String X;
+    public double X;
     @JsonProperty("y")
-    public String Y;
+    public double Y;
+
     public int id;
 
 }

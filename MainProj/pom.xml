@@ -17,13 +17,33 @@
     </properties>
 
     <dependencies>
+        <!--SqlServer依赖-->
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
             <version>4.0</version>
         </dependency>
+        <!--SqlServer驱动依赖-->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>10.2.0.jre8</version>
+            <scope>runtime</scope>
+        </dependency>
 
-<!--        引入项目-->
+        <!--        alibaba连接池-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>1.2.6</version>
+        </dependency>
+
+        <!--引入项目-->
         <dependency>
             <groupId>com.webgis</groupId>
             <artifactId>DataProj</artifactId>

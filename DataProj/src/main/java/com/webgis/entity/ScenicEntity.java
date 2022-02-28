@@ -13,7 +13,7 @@ import lombok.Data;
  */
 
 @Data
-@TableName("scenic")
+@TableName("scenicInfo")
 public class ScenicEntity {
 
     @TableId(value = "Name", type = IdType.AUTO)
@@ -23,10 +23,10 @@ public class ScenicEntity {
     public String address;
 
     @TableField("X")
-    public String x;
+    public double x;
 
     @TableField("Y")
-    public String y;
+    public double y;
 
     @TableField("jianjie")
     public String message;

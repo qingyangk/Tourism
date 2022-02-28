@@ -4,9 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.webgis.ResponseInfo;
 import com.webgis.entity.EnumErrCode;
 import com.webgis.entity.Info.ScenicInfo;
-import com.webgis.entity.Info.SearchInfo;
+import com.webgis.entity.Info.FormInfo;
+import com.webgis.entity.PageEntity;
 import com.webgis.entity.ScenicEntity;
+import com.webgis.entity.SearchEntity;
 import com.webgis.mapper.ScenicMapper;
+import com.webgis.mapper.TourMapper;
 import com.webgis.service.DataService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,41 +32,101 @@ public class DataImpl implements DataService {
     @Resource
     ScenicMapper scenicMapper;
 
-    public ResponseInfo queryScenic() {
-        QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
+    @Resource
+    TourMapper tourMapper;
 
+    /**
+     * 表格信息展示接口
+     *
+     * @param model
+     * @return
+     */
+    public ResponseInfo queryScenic(PageEntity model) {
+        QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
+        //List<ScenicEntity> sc = tourMapper.get1000();
         try {
+            long starttime = System.currentTimeMillis();
+            log.info("表格数据-start  " + model);
             List<ScenicEntity> scenicEntity = scenicMapper.selectList(qw);
 
-            /**
-             * 此处取消分页
-             */
-//            Map<String, Integer> map = getPage(scenicEntity.size(), 1);
-//
-//            List<ScenicInfo> ScInfos = new ArrayList<>();
-//            int count = 0;
-//            int minCount = map.get("min");
-//            int maxCount = map.get("max");
-//            for (ScenicEntity entity : scenicEntity) {
-//                count++;
-//                if (count > minCount && count <= maxCount) {
-//                    ScenicInfo scInfo = new ScenicInfo();
-//                    scInfo.message = entity.getMessage();
-//                    scInfo.address = entity.getAddress();
-//                    scInfo.name = entity.getName();
-//                    scInfo.X = entity.getX();
-//                    scInfo.Y = entity.getY();
-//                    scInfo.id = entity.getId();
-//                    ScInfos.add(scInfo);
-//                }
-//            }
-//
-//            SearchInfo searchInfo = new SearchInfo();
-//            searchInfo.setTotal(scenicEntity.size());
-//            searchInfo.setScInfo(ScInfos);
-//            searchInfo.setPages(map.get("pages"));
+            Map<String, Integer> map = getPage(scenicEntity.size(), model.getPage(), model.getCount());
 
-            return new ResponseInfo(EnumErrCode.OK, scenicEntity);
+            List<ScenicInfo> ScInfos = new ArrayList<>();
+            int count = 0;
+            int minCount = map.get("min");
+            int maxCount = map.get("max");
+            for (ScenicEntity entity : scenicEntity) {
+                count++;
+                if (count > minCount && count <= maxCount) {
+                    ScenicInfo scInfo = new ScenicInfo();
+                    scInfo.message = entity.getMessage();
+                    scInfo.address = entity.getAddress();
+                    scInfo.name = entity.getName();
+                    scInfo.X = entity.getX();
+                    scInfo.Y = entity.getY();
+                    scInfo.id = entity.getId();
+                    ScInfos.add(scInfo);
+                }
+            }
+
+            FormInfo formInfo = new FormInfo();
+            formInfo.setTotal(scenicEntity.size());
+            formInfo.setScInfo(ScInfos);
+            formInfo.setPages(map.get("pages"));
+
+            long endtime = System.currentTimeMillis();
+            log.info("表格数据-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, formInfo);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    /**
+     * 表格信息搜索接口
+     *
+     * @param model
+     */
+    public ResponseInfo searchScenic(SearchEntity model) {
+        String sql = model.getSearch();
+        //double[] xy = new double[2];
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("表格搜索-start  " + model);
+            QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
+            qw.like("Name", sql);
+
+            List<ScenicEntity> scenicEntity = scenicMapper.selectList(qw);
+
+            Map<String, Integer> map = getPage(scenicEntity.size(), model.getPage(), model.getCount());
+
+            List<ScenicInfo> ScInfos = new ArrayList<>();
+            int count = 0;
+            int minCount = map.get("min");
+            int maxCount = map.get("max");
+            for (ScenicEntity entity : scenicEntity) {
+                count++;
+                if (count > minCount && count <= maxCount) {
+                    ScenicInfo scInfo = new ScenicInfo();
+                    scInfo.message = entity.getMessage();
+                    scInfo.address = entity.getAddress();
+                    scInfo.name = entity.getName();
+                    scInfo.X = entity.getX();
+                    scInfo.Y = entity.getY();
+                    scInfo.id = entity.getId();
+                    ScInfos.add(scInfo);
+                }
+            }
+
+            FormInfo formInfo = new FormInfo();
+            formInfo.setTotal(scenicEntity.size());
+            formInfo.setScInfo(ScInfos);
+            formInfo.setPages(map.get("pages"));
+
+            long endtime = System.currentTimeMillis();
+            log.info("表格搜索-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, formInfo);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
@@ -78,7 +141,7 @@ public class DataImpl implements DataService {
      * @param pagenum
      * @return
      */
-    public Map<String, Integer> getPage(int size, int pagenum) {
+    public Map<String, Integer> getPage(int size, int pagenum, int count) {
         //符合条件要素个数
         int featureCount = size;
         //要素最小值
@@ -86,8 +149,8 @@ public class DataImpl implements DataService {
         //要素最大值
         int maxCount = featureCount;
         //计数
-        int count = 0;
-        int pageSize = 9;
+        //int count = 0;
+        int pageSize = count;
         int PageNum = pagenum;
         int pages;
         if (maxCount > pageSize) {
