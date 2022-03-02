@@ -134,6 +134,15 @@ public class DataImpl implements DataService {
     }
 
     /**
+     * 空间数据
+     */
+    public ResponseInfo space() {
+        List<ScenicEntity> sc = tourMapper.get1000();
+
+        return new ResponseInfo(EnumErrCode.OK, sc);
+    }
+
+    /**
      * 分页 传入当前页数及要素个数
      * 返回最大值、最小值、及页面总数
      *
@@ -173,4 +182,23 @@ public class DataImpl implements DataService {
         return map;
     }
 
+    /**
+     * 空间交集查询--点与面
+     *
+     * @param nvert 多边形的点数
+     * @param vertx 多边形x坐标的数组
+     * @param verty 多边形y坐标的数组
+     * @param testx 测试点x的坐标
+     * @param testy 测试点y的坐标
+     * @return
+     */
+    public int polygonIn(int nvert, double[] vertx, double[] verty, double testx, double testy) {
+        int i, j, c = 0;
+        for (i = 0, j = nvert - 1; i < nvert; j = i++) {
+            if (((verty[i] > testy) != (verty[j] > testy)) &&
+                    (testx < (vertx[j] - vertx[i]) * (testy - verty[i]) / (verty[j] - verty[i]) + vertx[i]))
+                c = 1;//条件都满足是，布尔为truec = !c;
+        }
+        return c;
+    }
 }

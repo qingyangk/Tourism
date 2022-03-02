@@ -18,4 +18,9 @@ public interface DataService extends Serializable {
      * 查询景点
      */
     ResponseInfo searchScenic(SearchEntity model);
+
+    /**
+     * 空间数据
+     */
+    ResponseInfo space();
 }

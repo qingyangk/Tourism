@@ -2,10 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.webgis.mapper.TourMapper">
 
-    <select id="get1000" resultType="com.webgis.entity.SearchEntity">
+    <select id="get1000" resultType="com.webgis.entity.ScenicEntity">
         SELECT *
         FROM dbo.scenicInfo
-        WHERE 1=1
+        WHERE id = 488
     </select>
 
 
