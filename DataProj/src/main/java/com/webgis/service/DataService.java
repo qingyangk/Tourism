@@ -2,6 +2,7 @@ package com.webgis.service;
 
 import com.webgis.ResponseInfo;
 import com.webgis.entity.PageEntity;
+import com.webgis.entity.Point;
 import com.webgis.entity.SearchEntity;
 
 import java.io.Serializable;
@@ -22,5 +23,5 @@ public interface DataService extends Serializable {
     /**
      * 空间数据
      */
-    ResponseInfo space();
+    ResponseInfo spaceIn(Point model);
 }

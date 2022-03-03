@@ -28,8 +28,14 @@ public class ScenicEntity {
     @TableField("Y")
     public double y;
 
-    @TableField("jianjie")
-    public String message;
+    @TableField("shi")
+    public String city;
+
+    @TableField("hot")
+    public String hot;
+
+    @TableField("jiage")
+    public String score;
 
     public int id;
 

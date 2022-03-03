@@ -1,17 +1,17 @@
 package com.webgis.serviceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.webgis.ResponseInfo;
-import com.webgis.entity.EnumErrCode;
+import com.webgis.entity.*;
 import com.webgis.entity.Info.ScenicInfo;
 import com.webgis.entity.Info.FormInfo;
-import com.webgis.entity.PageEntity;
-import com.webgis.entity.ScenicEntity;
-import com.webgis.entity.SearchEntity;
 import com.webgis.mapper.ScenicMapper;
 import com.webgis.mapper.TourMapper;
 import com.webgis.service.DataService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -42,37 +42,22 @@ public class DataImpl implements DataService {
      * @return
      */
     public ResponseInfo queryScenic(PageEntity model) {
-        QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
-        //List<ScenicEntity> sc = tourMapper.get1000();
         try {
             long starttime = System.currentTimeMillis();
             log.info("表格数据-start  " + model);
-            List<ScenicEntity> scenicEntity = scenicMapper.selectList(qw);
 
-            Map<String, Integer> map = getPage(scenicEntity.size(), model.getPage(), model.getCount());
+            int pageNum = model.getPage();
+            int count = model.getCount();
+            Page<ScenicEntity> page = new Page<>(pageNum, count);
+            QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
+            Page<ScenicEntity> scenicInfo = scenicMapper.selectPage(page, qw);
 
-            List<ScenicInfo> ScInfos = new ArrayList<>();
-            int count = 0;
-            int minCount = map.get("min");
-            int maxCount = map.get("max");
-            for (ScenicEntity entity : scenicEntity) {
-                count++;
-                if (count > minCount && count <= maxCount) {
-                    ScenicInfo scInfo = new ScenicInfo();
-                    scInfo.message = entity.getMessage();
-                    scInfo.address = entity.getAddress();
-                    scInfo.name = entity.getName();
-                    scInfo.X = entity.getX();
-                    scInfo.Y = entity.getY();
-                    scInfo.id = entity.getId();
-                    ScInfos.add(scInfo);
-                }
-            }
+            List<ScenicEntity> records = scenicInfo.getRecords();
 
             FormInfo formInfo = new FormInfo();
-            formInfo.setTotal(scenicEntity.size());
-            formInfo.setScInfo(ScInfos);
-            formInfo.setPages(map.get("pages"));
+            formInfo.setScInfo(records);
+            formInfo.setTotal(scenicInfo.getTotal());
+            formInfo.setPages(scenicInfo.getPages());
 
             long endtime = System.currentTimeMillis();
             log.info("表格数据-end  " + (endtime - starttime) + "ms");
@@ -90,39 +75,23 @@ public class DataImpl implements DataService {
      */
     public ResponseInfo searchScenic(SearchEntity model) {
         String sql = model.getSearch();
-        //double[] xy = new double[2];
         try {
             long starttime = System.currentTimeMillis();
             log.info("表格搜索-start  " + model);
+
+            int pageNum = model.getPage();
+            int count = model.getCount();
+            Page<ScenicEntity> page = new Page<>(pageNum, count);
             QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
             qw.like("Name", sql);
+            Page<ScenicEntity> searchInfo = scenicMapper.selectPage(page, qw);
 
-            List<ScenicEntity> scenicEntity = scenicMapper.selectList(qw);
-
-            Map<String, Integer> map = getPage(scenicEntity.size(), model.getPage(), model.getCount());
-
-            List<ScenicInfo> ScInfos = new ArrayList<>();
-            int count = 0;
-            int minCount = map.get("min");
-            int maxCount = map.get("max");
-            for (ScenicEntity entity : scenicEntity) {
-                count++;
-                if (count > minCount && count <= maxCount) {
-                    ScenicInfo scInfo = new ScenicInfo();
-                    scInfo.message = entity.getMessage();
-                    scInfo.address = entity.getAddress();
-                    scInfo.name = entity.getName();
-                    scInfo.X = entity.getX();
-                    scInfo.Y = entity.getY();
-                    scInfo.id = entity.getId();
-                    ScInfos.add(scInfo);
-                }
-            }
+            List<ScenicEntity> records = searchInfo.getRecords();
 
             FormInfo formInfo = new FormInfo();
-            formInfo.setTotal(scenicEntity.size());
-            formInfo.setScInfo(ScInfos);
-            formInfo.setPages(map.get("pages"));
+            formInfo.setScInfo(records);
+            formInfo.setTotal(searchInfo.getTotal());
+            formInfo.setPages(searchInfo.getPages());
 
             long endtime = System.currentTimeMillis();
             log.info("表格搜索-end  " + (endtime - starttime) + "ms");
@@ -136,10 +105,12 @@ public class DataImpl implements DataService {
     /**
      * 空间数据
      */
-    public ResponseInfo space() {
-        List<ScenicEntity> sc = tourMapper.get1000();
+    public ResponseInfo spaceIn(Point model) {
+        List<double[]> point = model.getPoint();
+        for (int i = 0; i < point.size(); i++) {
 
-        return new ResponseInfo(EnumErrCode.OK, sc);
+        }
+        return new ResponseInfo(EnumErrCode.OK, null);
     }
 
     /**
@@ -202,3 +173,25 @@ public class DataImpl implements DataService {
         return c;
     }
 }
+
+//老兵之凋零，残破的代码
+//            Page<ScenicEntity> obj = new Page<ScenicEntity>(2, 8);
+//            IPage<ScenicEntity> formInfo = scenicMapper.selectPage(obj, qw);
+//            Map<String, Integer> map = getPage(scenicEntity.size(), model.getPage(), model.getCount());
+//            List<ScenicInfo> ScInfos = new ArrayList<>();
+//            int count = 0;
+//            int minCount = map.get("min");
+//            int maxCount = map.get("max");
+//            for (ScenicEntity entity : scenicEntity) {
+//                count++;
+//                if (count > minCount && count <= maxCount) {
+//                    ScenicInfo scInfo = new ScenicInfo();
+//                    scInfo.message = entity.getJianjie();
+//                    scInfo.address = entity.getAddress();
+//                    scInfo.name = entity.getName();
+//                    scInfo.X = entity.getX();
+//                    scInfo.Y = entity.getY();
+//                    scInfo.id = entity.getId();
+//                    ScInfos.add(scInfo);
+//                }
+//            }

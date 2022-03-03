@@ -10,8 +10,10 @@ import java.util.List;
 @Mapper
 @Repository
 public interface TourMapper {
-    /**
-     * 查询前1000条数据
-     */
+
     List<ScenicEntity> get1000();
+
+    List<ScenicEntity> getForm(int page, int count,int jisuan);
+
+    List<ScenicEntity> searchForm(int page, int count,int jisuan, String model);
 }

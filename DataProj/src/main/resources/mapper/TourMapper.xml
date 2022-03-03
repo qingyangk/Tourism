@@ -8,5 +8,38 @@
         WHERE id = 488
     </select>
 
+    <select id="getForm" resultType="com.webgis.entity.ScenicEntity">
+        <if test="page==1">
+            SELECT TOP(9)*
+            FROM dbo.scenicInfo
+            ORDER by id
+        </if>
+        <if test="page>1">
+            SELECT top(9)*
+            FROM dbo.scenicInfo
+            WHERE id
+            NOT IN (SELECT TOP(999)id
+                    FROM dbo.scenicInfo
+                    ORDER by id)
+            ORDER by id
+        </if>
+    </select>
+
+    <select id="searchForm" resultType="com.webgis.entity.ScenicEntity">
+        <if test="page==1">
+            SELECT TOP(#{count})*
+            FROM dbo.scenicInfo
+            WHERE Name LIKE CONCAT('%',#{model},'%')
+            ORDER by id
+        </if>
+        <if test="page>1">
+            SELECT top(#{count})*
+            FROM dbo.scenicInfo
+            WHERE Name LIKE CONCAT('%',#{model},'%')
+                  id NOT IN (SELECT TOP(#{jisuan})id FROM dbo.scenicInfo ORDER by id)
+            ORDER by id
+        </if>
+    </select>
+
 
 </mapper>

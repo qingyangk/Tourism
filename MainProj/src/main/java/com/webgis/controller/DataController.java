@@ -2,6 +2,7 @@ package com.webgis.controller;
 
 import com.webgis.ResponseInfo;
 import com.webgis.entity.PageEntity;
+import com.webgis.entity.Point;
 import com.webgis.entity.SearchEntity;
 import com.webgis.service.DataService;
 import org.apache.logging.log4j.util.PerformanceSensitive;
@@ -48,7 +49,7 @@ public class DataController {
      * 空间数据
      */
     @PostMapping("space")
-    public ResponseInfo space() {
-        return dataService.space();
+    public ResponseInfo space(@RequestBody Point model) {
+        return dataService.spaceIn(model);
     }
 }
