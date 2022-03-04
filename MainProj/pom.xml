@@ -32,16 +32,11 @@
         </dependency>
 
 
-        <!--        alibaba连接池-->
+        <!--多数据源配置-->
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-            <version>1.2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid-spring-boot-starter</artifactId>
-            <version>1.2.6</version>
+            <groupId>com.baomidou</groupId>
+            <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
+            <version>3.4.1</version>
         </dependency>
 
         <!--引入项目-->

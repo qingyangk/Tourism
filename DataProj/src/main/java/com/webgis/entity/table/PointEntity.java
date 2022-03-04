@@ -1,4 +1,4 @@
-package com.webgis.entity;
+package com.webgis.entity.table;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.webgis.entity;
+package com.webgis.entity.table;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -13,7 +13,7 @@ import lombok.Data;
  */
 
 @Data
-@TableName("scenicInfo")
+@TableName("Info")
 public class ScenicEntity {
 
     @TableId(value = "Name", type = IdType.AUTO)
@@ -28,13 +28,13 @@ public class ScenicEntity {
     @TableField("Y")
     public double y;
 
-    @TableField("shi")
+    @TableField("city")
     public String city;
 
     @TableField("hot")
     public String hot;
 
-    @TableField("jiage")
+    @TableField("price")
     public String score;
 
     public int id;

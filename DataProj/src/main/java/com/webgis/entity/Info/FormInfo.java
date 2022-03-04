@@ -1,6 +1,6 @@
 package com.webgis.entity.Info;
 
-import com.webgis.entity.ScenicEntity;
+import com.webgis.entity.table.ScenicEntity;
 import lombok.Data;
 
 import java.util.List;

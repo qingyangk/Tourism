@@ -1,7 +1,6 @@
 package com.webgis.mapper;
 
-import com.webgis.entity.Info.FormInfo;
-import com.webgis.entity.ScenicEntity;
+import com.webgis.entity.table.ScenicEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 

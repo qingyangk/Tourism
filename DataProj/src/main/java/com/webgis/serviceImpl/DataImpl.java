@@ -1,21 +1,18 @@
 package com.webgis.serviceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.webgis.ResponseInfo;
 import com.webgis.entity.*;
-import com.webgis.entity.Info.ScenicInfo;
 import com.webgis.entity.Info.FormInfo;
+import com.webgis.entity.table.ScenicEntity;
 import com.webgis.mapper.ScenicMapper;
 import com.webgis.mapper.TourMapper;
 import com.webgis.service.DataService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +20,7 @@ import java.util.Map;
 /**
  * 景点信息提取接口
  */
+
 
 @Slf4j
 @Service(DataImpl.SERVICE_BEAN_NAME)

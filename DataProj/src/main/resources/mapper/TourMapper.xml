@@ -2,13 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.webgis.mapper.TourMapper">
 
-    <select id="get1000" resultType="com.webgis.entity.ScenicEntity">
+    <select id="get1000" resultType="com.webgis.entity.table.ScenicEntity">
         SELECT *
         FROM dbo.scenicInfo
         WHERE id = 488
     </select>
 
-    <select id="getForm" resultType="com.webgis.entity.ScenicEntity">
+    <select id="getForm" resultType="com.webgis.entity.table.ScenicEntity">
         <if test="page==1">
             SELECT TOP(9)*
             FROM dbo.scenicInfo
@@ -25,7 +25,7 @@
         </if>
     </select>
 
-    <select id="searchForm" resultType="com.webgis.entity.ScenicEntity">
+    <select id="searchForm" resultType="com.webgis.entity.table.ScenicEntity">
         <if test="page==1">
             SELECT TOP(#{count})*
             FROM dbo.scenicInfo
