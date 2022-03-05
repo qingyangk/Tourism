@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class Point {
 
-    List<double[]> point;
+    double[][] point;
 }

@@ -1,6 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.webgis.mapper.TourMapper">
+
+    <!--    几何查询点-->
+    <select id="queryPoint" resultType="com.webgis.entity.table.ScenicEntity">
+        select *
+        from info
+        WHERE x >= #{xmin}
+          and y >= #{ymin}
+          and x &lt;= #{xmax}
+          and y &lt;= #{ymax}
+    </select>
+
+    <select id="queryAll" resultType="com.webgis.entity.table.ScenicEntity">
+        select *
+        from info
+    </select>
+
+    <select id="coName" resultType="com.webgis.entity.table.CoScore">
+        select *
+        from coscore
+        where name = #{name}
+    </select>
+
+    <delete id="deSC" parameterType="com.webgis.entity.table.ScenicEntity">
+        delete
+        from info
+        where id = #{id}
+    </delete>
+
+    <update id="upSH" parameterType="com.webgis.entity.table.ScenicEntity">
+        update info
+        set hot=#{hot},
+            score=#{score}
+        where id = #{id}
+    </update>
+
 
     <select id="get1000" resultType="com.webgis.entity.table.ScenicEntity">
         SELECT *
@@ -19,8 +56,8 @@
             FROM dbo.scenicInfo
             WHERE id
             NOT IN (SELECT TOP(999)id
-                    FROM dbo.scenicInfo
-                    ORDER by id)
+            FROM dbo.scenicInfo
+            ORDER by id)
             ORDER by id
         </if>
     </select>
@@ -36,7 +73,7 @@
             SELECT top(#{count})*
             FROM dbo.scenicInfo
             WHERE Name LIKE CONCAT('%',#{model},'%')
-                  id NOT IN (SELECT TOP(#{jisuan})id FROM dbo.scenicInfo ORDER by id)
+            id NOT IN (SELECT TOP(#{jisuan})id FROM dbo.scenicInfo ORDER by id)
             ORDER by id
         </if>
     </select>

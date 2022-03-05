@@ -1,5 +1,7 @@
 package com.webgis.mapper;
 
+import com.webgis.entity.table.CoScore;
+import com.webgis.entity.table.PointEntity;
 import com.webgis.entity.table.ScenicEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
@@ -10,9 +12,16 @@ import java.util.List;
 @Repository
 public interface TourMapper {
 
-    List<ScenicEntity> get1000();
+    //几何查询--获取区域内点
+    List<ScenicEntity> queryPoint(double xmax, double xmin, double ymax, double ymin);
 
-    List<ScenicEntity> getForm(int page, int count,int jisuan);
+    List<ScenicEntity> queryAll();
 
-    List<ScenicEntity> searchForm(int page, int count,int jisuan, String model);
+    List<CoScore> coName(String name);
+
+    void deSC(int id);
+
+    void upSH(int id, int hot, double score);
+
+
 }

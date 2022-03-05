@@ -1,21 +1,24 @@
 package com.webgis.serviceImpl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.webgis.ResponseInfo;
 import com.webgis.entity.*;
 import com.webgis.entity.Info.FormInfo;
+import com.webgis.entity.Info.PointInfo;
+import com.webgis.entity.table.CoScore;
+import com.webgis.entity.table.PointEntity;
 import com.webgis.entity.table.ScenicEntity;
 import com.webgis.mapper.ScenicMapper;
 import com.webgis.mapper.TourMapper;
 import com.webgis.service.DataService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 景点信息提取接口
@@ -24,12 +27,15 @@ import java.util.Map;
 
 @Slf4j
 @Service(DataImpl.SERVICE_BEAN_NAME)
+@DS("MySql")
 public class DataImpl implements DataService {
     public final static String SERVICE_BEAN_NAME = "DataService";
 
+    //@Autowired
     @Resource
     ScenicMapper scenicMapper;
 
+    //@Autowired
     @Resource
     TourMapper tourMapper;
 
@@ -104,11 +110,57 @@ public class DataImpl implements DataService {
      * 空间数据
      */
     public ResponseInfo spaceIn(Point model) {
-        List<double[]> point = model.getPoint();
-        for (int i = 0; i < point.size(); i++) {
+        double[][] point = model.getPoint();
+        int size = point.length;
 
+        double[] vertx = new double[size];
+        double[] verty = new double[size];
+        for (int i = 0; i < size; i++) {
+            vertx[i] = point[i][0];
+            verty[i] = point[i][1];
         }
-        return new ResponseInfo(EnumErrCode.OK, null);
+        Arrays.sort(vertx);
+        Arrays.sort(verty);
+        double xmax = vertx[size - 1];
+        double xmin = vertx[0];
+        double ymax = verty[size - 1];
+        double ymin = verty[0];
+        List<ScenicEntity> pointEntity = tourMapper.queryPoint(xmax, xmin, ymax, ymin);
+
+        List<ScenicEntity> pointInfo = new ArrayList<>();
+        for (ScenicEntity entity : pointEntity) {
+            boolean judge = polygonIn(size, vertx, verty, entity.getX(), entity.getY());
+            if (judge) {
+                pointInfo.add(entity);
+            }
+        }
+        return new ResponseInfo(EnumErrCode.OK, pointInfo);
+    }
+
+    public ResponseInfo disData(PageEntity page) {
+//        QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
+        List<ScenicEntity> scenicEntity = tourMapper.queryAll();
+
+        for (ScenicEntity sc : scenicEntity) {
+            List<CoScore> coScore = tourMapper.coName(sc.getName());
+            int hot = coScore.size();
+            if (hot <= 5) {
+                //删除该记录
+                tourMapper.deSC(sc.getId());
+                log.info("delete " + sc.getId() + " " + sc.getName());
+                continue;
+            } else {
+                double fen = 0;
+                for (CoScore cs : coScore) {
+                    fen += cs.getScore();
+                }
+                fen = (double) fen / hot;
+                //将分和hot插入记录，
+                tourMapper.upSH(sc.getId(), hot, fen);
+                log.info("update " + sc.getId() + " " + hot + " " + fen);
+            }
+        }
+        return new ResponseInfo(EnumErrCode.OK, "ok", null);
     }
 
     /**
@@ -161,12 +213,13 @@ public class DataImpl implements DataService {
      * @param testy 测试点y的坐标
      * @return
      */
-    public int polygonIn(int nvert, double[] vertx, double[] verty, double testx, double testy) {
-        int i, j, c = 0;
+    public boolean polygonIn(int nvert, double[] vertx, double[] verty, double testx, double testy) {
+        int i, j;
+        boolean c = false;
         for (i = 0, j = nvert - 1; i < nvert; j = i++) {
             if (((verty[i] > testy) != (verty[j] > testy)) &&
                     (testx < (vertx[j] - vertx[i]) * (testy - verty[i]) / (verty[j] - verty[i]) + vertx[i]))
-                c = 1;//条件都满足是，布尔为truec = !c;
+                c = true;//条件都满足是，布尔为truec = !c;
         }
         return c;
     }

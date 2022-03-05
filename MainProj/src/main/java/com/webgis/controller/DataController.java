@@ -52,4 +52,12 @@ public class DataController {
     public ResponseInfo space(@RequestBody Point model) {
         return dataService.spaceIn(model);
     }
+
+    /**
+     *
+     */
+    @PostMapping("disData")
+    public ResponseInfo disData(@RequestBody PageEntity model) {
+        return dataService.disData(model);
+    }
 }

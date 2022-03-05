@@ -13,30 +13,31 @@ import lombok.Data;
  */
 
 @Data
-@TableName("Info")
+@TableName("info")
 public class ScenicEntity {
 
-    @TableId(value = "Name", type = IdType.AUTO)
+    @TableField("name")
     public String name;
 
     @TableField("address")
     public String address;
 
-    @TableField("X")
+    @TableField("x")
     public double x;
 
-    @TableField("Y")
+    @TableField("y")
     public double y;
 
     @TableField("city")
     public String city;
 
     @TableField("hot")
-    public String hot;
+    public int hot;
 
-    @TableField("price")
-    public String score;
+    @TableField("score")
+    public double score;
 
+    @TableId(value = "id", type = IdType.AUTO)
     public int id;
 
 }

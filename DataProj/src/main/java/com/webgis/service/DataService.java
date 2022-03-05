@@ -4,6 +4,7 @@ import com.webgis.ResponseInfo;
 import com.webgis.entity.PageEntity;
 import com.webgis.entity.Point;
 import com.webgis.entity.SearchEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 
@@ -24,4 +25,9 @@ public interface DataService extends Serializable {
      * 空间数据
      */
     ResponseInfo spaceIn(Point model);
+
+    /**
+     * dis data
+     */
+    ResponseInfo disData(PageEntity model);
 }
