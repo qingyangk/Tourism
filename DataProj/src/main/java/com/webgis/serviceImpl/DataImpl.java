@@ -4,17 +4,17 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.webgis.ResponseInfo;
+import com.webgis.entity.Travel;
 import com.webgis.entity.*;
 import com.webgis.entity.Info.FormInfo;
-import com.webgis.entity.Info.PointInfo;
 import com.webgis.entity.table.CoScore;
-import com.webgis.entity.table.PointEntity;
 import com.webgis.entity.table.ScenicEntity;
+import com.webgis.entity.table.TravelEntity;
 import com.webgis.mapper.ScenicMapper;
 import com.webgis.mapper.TourMapper;
+import com.webgis.mapper.TravelMapper;
 import com.webgis.service.DataService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -31,13 +31,14 @@ import java.util.*;
 public class DataImpl implements DataService {
     public final static String SERVICE_BEAN_NAME = "DataService";
 
-    //@Autowired
     @Resource
     ScenicMapper scenicMapper;
 
-    //@Autowired
     @Resource
     TourMapper tourMapper;
+
+    @Resource
+    TravelMapper travelMapper;
 
     /**
      * 表格信息展示接口
@@ -137,6 +138,12 @@ public class DataImpl implements DataService {
         return new ResponseInfo(EnumErrCode.OK, pointInfo);
     }
 
+    /**
+     * 对应数据--评论与景点 有则计算热度、分数，无则在景点表中删除
+     *
+     * @param page
+     * @return
+     */
     public ResponseInfo disData(PageEntity page) {
 //        QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
         List<ScenicEntity> scenicEntity = tourMapper.queryAll();
@@ -161,6 +168,38 @@ public class DataImpl implements DataService {
             }
         }
         return new ResponseInfo(EnumErrCode.OK, "ok", null);
+    }
+
+    /**
+     * 游记查询
+     * @param model
+     * @return
+     */
+    public ResponseInfo queryTravel(Travel model) {
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("游记查询-start  " + model);
+
+            int count = model.getCount();
+            QueryWrapper<TravelEntity> qw = new QueryWrapper<>();
+            qw.like("region", model.getCity());
+            List<TravelEntity> travelEntity = travelMapper.selectList(qw);
+            TravelEntity entity = new TravelEntity();
+            if (count > travelEntity.size()) {
+                int random = new Random().nextInt(travelEntity.size());
+                entity = travelEntity.get(random);
+                System.out.println("当前游记随机数：" + random);
+            } else {
+                entity = travelEntity.get(count);
+            }
+
+            long endtime = System.currentTimeMillis();
+            log.info("游记查询-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, entity);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
     }
 
     /**

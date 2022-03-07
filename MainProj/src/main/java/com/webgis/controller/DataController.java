@@ -4,6 +4,7 @@ import com.webgis.ResponseInfo;
 import com.webgis.entity.PageEntity;
 import com.webgis.entity.Point;
 import com.webgis.entity.SearchEntity;
+import com.webgis.entity.Travel;
 import com.webgis.service.DataService;
 import org.apache.logging.log4j.util.PerformanceSensitive;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,10 +55,22 @@ public class DataController {
     }
 
     /**
-     *
+     * 处理数据--景点与评论对应
      */
     @PostMapping("disData")
     public ResponseInfo disData(@RequestBody PageEntity model) {
         return dataService.disData(model);
     }
+
+    /**
+     * 获取城市游记
+     * @param model
+     * @return
+     */
+    @PostMapping("cityTravel")
+    public ResponseInfo queryTravel(@RequestBody Travel model) {
+        return dataService.queryTravel(model);
+    }
+
+
 }
