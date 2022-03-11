@@ -6,7 +6,6 @@ import com.webgis.entity.Point;
 import com.webgis.entity.SearchEntity;
 import com.webgis.entity.Travel;
 import com.webgis.service.DataService;
-import org.apache.logging.log4j.util.PerformanceSensitive;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

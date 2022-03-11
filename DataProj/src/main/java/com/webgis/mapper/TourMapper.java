@@ -1,9 +1,6 @@
 package com.webgis.mapper;
 
-import com.webgis.entity.table.CoScore;
-import com.webgis.entity.table.PointEntity;
-import com.webgis.entity.table.ScenicEntity;
-import com.webgis.entity.table.TravelEntity;
+import com.webgis.entity.table.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -24,6 +21,9 @@ public interface TourMapper {
 
     void upSH(int id, int hot, double score);
 
+    List<CoPC> coPC(String name);
+
+    void upPC(String name, String sheng, String shi);
 
 
 }

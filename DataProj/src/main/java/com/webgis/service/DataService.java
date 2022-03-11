@@ -5,16 +5,16 @@ import com.webgis.entity.PageEntity;
 import com.webgis.entity.Point;
 import com.webgis.entity.SearchEntity;
 import com.webgis.entity.Travel;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 
+/**
+ * 数据查询接口
+ */
 public interface DataService extends Serializable {
 
     /**
      * 表格基本信息展示
-     *
-     * @return
      */
     ResponseInfo queryScenic(PageEntity model);
 
@@ -33,5 +33,8 @@ public interface DataService extends Serializable {
      */
     ResponseInfo disData(PageEntity model);
 
+    /**
+     * 查询游记
+     */
     ResponseInfo queryTravel(Travel model);
 }

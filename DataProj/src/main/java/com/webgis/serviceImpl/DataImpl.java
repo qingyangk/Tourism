@@ -7,6 +7,7 @@ import com.webgis.ResponseInfo;
 import com.webgis.entity.Travel;
 import com.webgis.entity.*;
 import com.webgis.entity.Info.FormInfo;
+import com.webgis.entity.table.CoPC;
 import com.webgis.entity.table.CoScore;
 import com.webgis.entity.table.ScenicEntity;
 import com.webgis.entity.table.TravelEntity;
@@ -130,6 +131,7 @@ public class DataImpl implements DataService {
 
         List<ScenicEntity> pointInfo = new ArrayList<>();
         for (ScenicEntity entity : pointEntity) {
+            //判断是否在传入的多边形内
             boolean judge = polygonIn(size, vertx, verty, entity.getX(), entity.getY());
             if (judge) {
                 pointInfo.add(entity);
@@ -139,39 +141,61 @@ public class DataImpl implements DataService {
     }
 
     /**
-     * 对应数据--评论与景点 有则计算热度、分数，无则在景点表中删除
+     * 当page=1时 对应数据--评论与景点 有则计算热度、分数，无则在景点表中删除
      *
      * @param page
      * @return
      */
     public ResponseInfo disData(PageEntity page) {
 //        QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
-        List<ScenicEntity> scenicEntity = tourMapper.queryAll();
+        if (page.getPage() == 1) {
+            List<ScenicEntity> scenicEntity = tourMapper.queryAll();
 
-        for (ScenicEntity sc : scenicEntity) {
-            List<CoScore> coScore = tourMapper.coName(sc.getName());
-            int hot = coScore.size();
-            if (hot <= 5) {
-                //删除该记录
-                tourMapper.deSC(sc.getId());
-                log.info("delete " + sc.getId() + " " + sc.getName());
-                continue;
-            } else {
-                double fen = 0;
-                for (CoScore cs : coScore) {
-                    fen += cs.getScore();
+            for (ScenicEntity sc : scenicEntity) {
+                List<CoScore> coScore = tourMapper.coName(sc.getName());
+                int hot = coScore.size();
+                if (hot <= 5) {
+                    //删除该记录
+                    tourMapper.deSC(sc.getId());
+                    log.info("delete " + sc.getId() + " " + sc.getName());
+                    continue;
+                } else {
+                    double fen = 0;
+                    for (CoScore cs : coScore) {
+                        fen += cs.getScore();
+                    }
+                    fen = (double) fen / hot;
+                    //将分和hot插入记录，
+                    tourMapper.upSH(sc.getId(), hot, fen);
+                    log.info("update " + sc.getId() + " " + hot + " " + fen);
                 }
-                fen = (double) fen / hot;
-                //将分和hot插入记录，
-                tourMapper.upSH(sc.getId(), hot, fen);
-                log.info("update " + sc.getId() + " " + hot + " " + fen);
             }
+        }
+        if (page.getPage() == 2) {
+            //查询所有景点
+            List<ScenicEntity> scenicEntity = tourMapper.queryAll();
+            for (ScenicEntity entity : scenicEntity) {
+                //用景点名称去找寻评论
+                List<CoPC> copc = tourMapper.coPC(entity.getName());
+                if (copc.size() == 0)
+                    continue;
+                else {
+                    //添加省、城市
+                    tourMapper.upPC(entity.getName(), entity.getProvince(), entity.getCity());
+                    String info = entity.getName() + " " + entity.getProvince() + " " + entity.getCity();
+                    log.info("add " + info);
+                }
+            }
+        }
+        if (page.getPage() == 3) {
+
         }
         return new ResponseInfo(EnumErrCode.OK, "ok", null);
     }
 
     /**
      * 游记查询
+     *
      * @param model
      * @return
      */

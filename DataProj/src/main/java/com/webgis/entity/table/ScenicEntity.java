@@ -28,6 +28,9 @@ public class ScenicEntity {
     @TableField("y")
     public double y;
 
+    @TableField("province")
+    public String province;
+
     @TableField("city")
     public String city;
 

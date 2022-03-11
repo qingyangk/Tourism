@@ -14,23 +14,27 @@
           and y &lt;= #{ymax}
     </select>
 
+    <!--    景点查询所有信息-->
     <select id="queryAll" resultType="com.webgis.entity.table.ScenicEntity">
         select *
         from info
     </select>
 
+    <!--    查询景点分数及评论个数-->
     <select id="coName" resultType="com.webgis.entity.table.CoScore">
         select *
         from coscore
         where name = #{name}
     </select>
 
+    <!--    删除信息不对应的景点-->
     <delete id="deSC" parameterType="com.webgis.entity.table.ScenicEntity">
         delete
         from info
         where id = #{id}
     </delete>
 
+    <!--    更新景点热度和分数-->
     <update id="upSH" parameterType="com.webgis.entity.table.ScenicEntity">
         update info
         set hot=#{hot},
@@ -38,6 +42,20 @@
         where id = #{id}
     </update>
 
+    <!--查询景点个数-->
+    <select id="coPC" resultType="com.webgis.entity.table.CoPC">
+        select *
+        from compc
+        where name = #{name}
+    </select>
+
+    <!--更新评论省、市-->
+    <update id="upPC" parameterType="com.webgis.entity.table.CoPC">
+        update compc
+        set province= #{sheng},
+            city= #{shi}
+        where name = #{name}
+    </update>
 
     <select id="get1000" resultType="com.webgis.entity.table.ScenicEntity">
         SELECT *
