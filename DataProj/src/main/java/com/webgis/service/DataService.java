@@ -37,4 +37,6 @@ public interface DataService extends Serializable {
      * 查询游记
      */
     ResponseInfo queryTravel(Travel model);
+
+    ResponseInfo ScenicRank();
 }

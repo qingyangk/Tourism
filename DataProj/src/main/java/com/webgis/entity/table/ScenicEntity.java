@@ -43,4 +43,6 @@ public class ScenicEntity {
     @TableId(value = "id", type = IdType.AUTO)
     public int id;
 
+    public int comrank;
+
 }

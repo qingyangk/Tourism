@@ -6,10 +6,7 @@ import com.webgis.entity.Point;
 import com.webgis.entity.SearchEntity;
 import com.webgis.entity.Travel;
 import com.webgis.service.DataService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -63,6 +60,7 @@ public class DataController {
 
     /**
      * 获取城市游记
+     *
      * @param model
      * @return
      */
@@ -71,5 +69,13 @@ public class DataController {
         return dataService.queryTravel(model);
     }
 
-
+    /**
+     * 查询景点排行
+     *
+     * @return
+     */
+    @GetMapping("scenicRank")
+    public ResponseInfo ScenicRank() {
+        return dataService.ScenicRank();
+    }
 }

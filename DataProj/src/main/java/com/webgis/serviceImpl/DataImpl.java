@@ -4,13 +4,11 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.webgis.ResponseInfo;
+import com.webgis.entity.Info.RankInfo;
 import com.webgis.entity.Travel;
 import com.webgis.entity.*;
 import com.webgis.entity.Info.FormInfo;
-import com.webgis.entity.table.CoPC;
-import com.webgis.entity.table.CoScore;
-import com.webgis.entity.table.ScenicEntity;
-import com.webgis.entity.table.TravelEntity;
+import com.webgis.entity.table.*;
 import com.webgis.mapper.ScenicMapper;
 import com.webgis.mapper.TourMapper;
 import com.webgis.mapper.TravelMapper;
@@ -188,6 +186,58 @@ public class DataImpl implements DataService {
             }
         }
         if (page.getPage() == 3) {
+            List<ScenicEntity> scenicEntity = tourMapper.queryAll();
+            for (ScenicEntity sc : scenicEntity) {
+                List<CoScore> coScore = tourMapper.coName(sc.getName());
+                int hot = coScore.size();
+                if (hot < 1) {
+                    //删除该记录
+                    tourMapper.deSC(sc.getId());
+                    log.info("delete " + sc.getId() + " " + sc.getName());
+                    continue;
+                } else {
+                    double fen = 0;
+                    for (CoScore cs : coScore) {
+                        fen += cs.getScore();
+                    }
+                    fen = (double) fen / hot;
+                    //将分和hot插入记录，
+                    tourMapper.upSH(sc.getId(), hot, fen);
+                    log.info("update " + sc.getId() + " " + hot + " " + fen);
+                }
+            }
+        }
+        if (page.getPage() == 4) {
+            List<Map<String, Object>> citys = tourMapper.cRank();
+            int id = 1;
+            for (Map<String, Object> cr : citys) {
+                String city = (String) cr.get("city");
+                int cityCount = tourMapper.cCount(city);
+                tourMapper.inCC(id, city, cityCount);
+                id++;
+            }
+        }
+        if (page.getPage() == 5) {
+            //查询所有城市
+            List<CityRank> cityRanks = tourMapper.getcity();
+            log.info("查询到所有城市");
+            for (CityRank cr : cityRanks) {
+                String city = cr.getCity();
+                //查询该城市的景点信息
+                List<ScenicEntity> scenics = tourMapper.cScenicCount(city);
+                log.info("查询到该城市的信息--" + city);
+                if (scenics.size() == 0) {
+                    continue;
+                }
+                double scorenum = 0;
+                for (ScenicEntity se : scenics) {
+                    scorenum += se.getScore();
+                }
+                double score = scorenum / scenics.size();
+                //更新城市景点个数及平均分数
+                tourMapper.upCityScore(city, scenics.size(), score);
+                log.info("赋值于该城市景点数量、分数:" + city + scenics.size() + "、" + score);
+            }
 
         }
         return new ResponseInfo(EnumErrCode.OK, "ok", null);
@@ -220,6 +270,56 @@ public class DataImpl implements DataService {
             long endtime = System.currentTimeMillis();
             log.info("游记查询-end  " + (endtime - starttime) + "ms");
             return new ResponseInfo(EnumErrCode.OK, entity);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    /**
+     * 获取景点排行--以热度和分数作为权重、level ！=null
+     *
+     * @return
+     */
+    public ResponseInfo ScenicRank() {
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("景点排行-start  ");
+
+            QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
+            qw.orderByAsc("comrank");
+            qw.ne("level", "null");
+            qw.last("limit 10");
+            List<ScenicEntity> entity = scenicMapper.selectList(qw);
+            List<RankInfo> rankInfos = new ArrayList<>();
+            for (ScenicEntity en : entity) {
+                RankInfo rankInfo = new RankInfo();
+                rankInfo.setName(en.getName());
+                rankInfo.setCity(en.getCity());
+                rankInfo.setComrank(en.getComrank());
+                rankInfo.setHot(en.getHot());
+                rankInfo.setScore(en.getScore());
+                rankInfos.add(rankInfo);
+            }
+
+            long endtime = System.currentTimeMillis();
+            log.info("景点排行-end  " + (endtime - starttime) + "ms");
+
+            return new ResponseInfo(EnumErrCode.OK, rankInfos);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    public ResponseInfo CityRank(){
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("城市排名查询-start  ");
+
+            List<CityRank>cityRanks =
+
+            return new ResponseInfo(EnumErrCode.OK, null);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());

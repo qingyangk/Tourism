@@ -57,6 +57,42 @@
         where name = #{name}
     </update>
 
+    <!--获取评论城市列表-->
+    <select id="cRank" resultType="map">
+        select distinct city
+        from comment
+    </select>
+
+    <select id="cCount" resultType="int">
+        select count(*)
+        from comment
+        where city = #{city}
+    </select>
+
+    <insert id="inCC" parameterType="com.webgis.entity.table.CityRank">
+        insert into cityrank(id, city, comcount)
+        values (#{id}, #{city}, #{comcount})
+    </insert>
+
+    <select id="cScenicCount" resultType="com.webgis.entity.table.ScenicEntity">
+        select name, score
+        from info
+        where city = #{city}
+    </select>
+
+    <select id="getcity" resultType="com.webgis.entity.table.CityRank">
+        select city
+        from cityrank
+    </select>
+
+    <update id="upCityScore" parameterType="com.webgis.entity.table.CityRank">
+        update cityrank
+        set sccount = #{sccount},
+            scscore = #{scscore}
+        where city = #{city}
+    </update>
+
+
     <select id="get1000" resultType="com.webgis.entity.table.ScenicEntity">
         SELECT *
         FROM dbo.scenicInfo

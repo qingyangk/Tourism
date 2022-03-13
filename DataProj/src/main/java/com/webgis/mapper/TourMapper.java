@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 @Repository
@@ -25,5 +26,17 @@ public interface TourMapper {
 
     void upPC(String name, String sheng, String shi);
 
+    List<Map<String, Object>> cRank();
 
+    int cCount(String city);
+
+    void inCC(int id, String city, int comcount);
+
+    List<ScenicEntity> cScenicCount(String city);
+
+    List<CityRank> getcity();
+
+    void upCityScore(String city, int sccount, double scscore);
+
+    List<CityRank>
 }
