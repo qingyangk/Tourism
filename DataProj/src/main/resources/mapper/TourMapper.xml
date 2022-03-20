@@ -92,6 +92,17 @@
         where city = #{city}
     </update>
 
+    <select id="cityRank" resultType="com.webgis.entity.table.CityRank">
+        select *
+        from cityrank
+        order by hotrank limit 0,10
+    </select>
+
+    <select id="getPoint" resultType="com.webgis.entity.table.PointEntity">
+        select *
+        from point
+    </select>
+
 
     <select id="get1000" resultType="com.webgis.entity.table.ScenicEntity">
         SELECT *

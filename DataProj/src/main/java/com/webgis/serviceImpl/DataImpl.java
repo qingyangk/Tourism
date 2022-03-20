@@ -4,10 +4,9 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.webgis.ResponseInfo;
-import com.webgis.entity.Info.RankInfo;
+import com.webgis.entity.Info.*;
 import com.webgis.entity.Travel;
 import com.webgis.entity.*;
-import com.webgis.entity.Info.FormInfo;
 import com.webgis.entity.table.*;
 import com.webgis.mapper.ScenicMapper;
 import com.webgis.mapper.TourMapper;
@@ -139,108 +138,152 @@ public class DataImpl implements DataService {
     }
 
     /**
-     * 当page=1时 对应数据--评论与景点 有则计算热度、分数，无则在景点表中删除
+     * 数据处理接口、用于处理数据库中sql语句不好写的数据
      *
      * @param page
      * @return
      */
-    public ResponseInfo disData(PageEntity page) {
-//        QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
-        if (page.getPage() == 1) {
-            List<ScenicEntity> scenicEntity = tourMapper.queryAll();
+    public ResponseInfo disData(SearchEntity page) {
+        try {
+            /**
+             * 将景点表与评论表对应 删除评论数不足5的景点
+             */
+            if (page.getPage() == 1) {
+                List<ScenicEntity> scenicEntity = tourMapper.queryAll();
 
-            for (ScenicEntity sc : scenicEntity) {
-                List<CoScore> coScore = tourMapper.coName(sc.getName());
-                int hot = coScore.size();
-                if (hot <= 5) {
-                    //删除该记录
-                    tourMapper.deSC(sc.getId());
-                    log.info("delete " + sc.getId() + " " + sc.getName());
-                    continue;
-                } else {
-                    double fen = 0;
-                    for (CoScore cs : coScore) {
-                        fen += cs.getScore();
+                for (ScenicEntity sc : scenicEntity) {
+                    List<CoScore> coScore = tourMapper.coName(sc.getName());
+                    int hot = coScore.size();
+                    if (hot <= 5) {
+                        //删除该记录
+                        tourMapper.deSC(sc.getId());
+                        log.info("delete " + sc.getId() + " " + sc.getName());
+                        continue;
+                    } else {
+                        double fen = 0;
+                        for (CoScore cs : coScore) {
+                            fen += cs.getScore();
+                        }
+                        fen = (double) fen / hot;
+                        //将分和hot插入记录，
+                        tourMapper.upSH(sc.getId(), hot, fen);
+                        log.info("update " + sc.getId() + " " + hot + " " + fen);
                     }
-                    fen = (double) fen / hot;
-                    //将分和hot插入记录，
-                    tourMapper.upSH(sc.getId(), hot, fen);
-                    log.info("update " + sc.getId() + " " + hot + " " + fen);
                 }
             }
-        }
-        if (page.getPage() == 2) {
-            //查询所有景点
-            List<ScenicEntity> scenicEntity = tourMapper.queryAll();
-            for (ScenicEntity entity : scenicEntity) {
-                //用景点名称去找寻评论
-                List<CoPC> copc = tourMapper.coPC(entity.getName());
-                if (copc.size() == 0)
-                    continue;
-                else {
-                    //添加省、城市
-                    tourMapper.upPC(entity.getName(), entity.getProvince(), entity.getCity());
-                    String info = entity.getName() + " " + entity.getProvince() + " " + entity.getCity();
-                    log.info("add " + info);
-                }
-            }
-        }
-        if (page.getPage() == 3) {
-            List<ScenicEntity> scenicEntity = tourMapper.queryAll();
-            for (ScenicEntity sc : scenicEntity) {
-                List<CoScore> coScore = tourMapper.coName(sc.getName());
-                int hot = coScore.size();
-                if (hot < 1) {
-                    //删除该记录
-                    tourMapper.deSC(sc.getId());
-                    log.info("delete " + sc.getId() + " " + sc.getName());
-                    continue;
-                } else {
-                    double fen = 0;
-                    for (CoScore cs : coScore) {
-                        fen += cs.getScore();
+            /**
+             * 在评论表中添加省、市字段值
+             */
+            if (page.getPage() == 2) {
+                //查询所有景点
+                List<ScenicEntity> scenicEntity = tourMapper.queryAll();
+                for (ScenicEntity entity : scenicEntity) {
+                    //用景点名称去找寻评论
+                    List<CoPC> copc = tourMapper.coPC(entity.getName());
+                    if (copc.size() == 0)
+                        continue;
+                    else {
+                        //添加省、城市
+                        tourMapper.upPC(entity.getName(), entity.getProvince(), entity.getCity());
+                        String info = entity.getName() + " " + entity.getProvince() + " " + entity.getCity();
+                        log.info("add " + info);
                     }
-                    fen = (double) fen / hot;
-                    //将分和hot插入记录，
-                    tourMapper.upSH(sc.getId(), hot, fen);
-                    log.info("update " + sc.getId() + " " + hot + " " + fen);
                 }
             }
-        }
-        if (page.getPage() == 4) {
-            List<Map<String, Object>> citys = tourMapper.cRank();
-            int id = 1;
-            for (Map<String, Object> cr : citys) {
-                String city = (String) cr.get("city");
-                int cityCount = tourMapper.cCount(city);
-                tourMapper.inCC(id, city, cityCount);
-                id++;
-            }
-        }
-        if (page.getPage() == 5) {
-            //查询所有城市
-            List<CityRank> cityRanks = tourMapper.getcity();
-            log.info("查询到所有城市");
-            for (CityRank cr : cityRanks) {
-                String city = cr.getCity();
-                //查询该城市的景点信息
-                List<ScenicEntity> scenics = tourMapper.cScenicCount(city);
-                log.info("查询到该城市的信息--" + city);
-                if (scenics.size() == 0) {
-                    continue;
+            /**
+             * 从评论表中获取分与热度
+             */
+            if (page.getPage() == 3) {
+                List<ScenicEntity> scenicEntity = tourMapper.queryAll();
+                for (ScenicEntity sc : scenicEntity) {
+                    List<CoScore> coScore = tourMapper.coName(sc.getName());
+                    int hot = coScore.size();
+                    if (hot < 1) {
+                        //删除该记录
+                        tourMapper.deSC(sc.getId());
+                        log.info("delete " + sc.getId() + " " + sc.getName());
+                        continue;
+                    } else {
+                        double fen = 0;
+                        for (CoScore cs : coScore) {
+                            fen += cs.getScore();
+                        }
+                        fen = (double) fen / hot;
+                        //将分和hot插入记录，
+                        tourMapper.upSH(sc.getId(), hot, fen);
+                        log.info("update " + sc.getId() + " " + hot + " " + fen);
+                    }
                 }
-                double scorenum = 0;
-                for (ScenicEntity se : scenics) {
-                    scorenum += se.getScore();
-                }
-                double score = scorenum / scenics.size();
-                //更新城市景点个数及平均分数
-                tourMapper.upCityScore(city, scenics.size(), score);
-                log.info("赋值于该城市景点数量、分数:" + city + scenics.size() + "、" + score);
             }
+            /**
+             * 新表添加城市，及计算城市评论数
+             */
+            if (page.getPage() == 4) {
+                List<Map<String, Object>> citys = tourMapper.cRank();
+                int id = 1;
+                for (Map<String, Object> cr : citys) {
+                    String city = (String) cr.get("city");
+                    int cityCount = tourMapper.cCount(city);
+                    tourMapper.inCC(id, city, cityCount);
+                    id++;
+                }
+            }
+            /**
+             * 赋于城市景点个数及分数
+             */
+            if (page.getPage() == 5) {
+                //查询所有城市
+                List<CityRank> cityRanks = tourMapper.getcity();
+                log.info("查询到所有城市");
+                for (CityRank cr : cityRanks) {
+                    String city = cr.getCity();
+                    //查询该城市的景点信息
+                    List<ScenicEntity> scenics = tourMapper.cScenicCount(city);
+                    log.info("查询到该城市的信息--" + city);
+                    if (scenics.size() == 0) {
+                        continue;
+                    }
+                    double scorenum = 0;
+                    for (ScenicEntity se : scenics) {
+                        scorenum += se.getScore();
+                    }
+                    double score = scorenum / scenics.size();
+                    //更新城市景点个数及平均分数
+                    tourMapper.upCityScore(city, scenics.size(), score);
+                    log.info("赋值于该城市景点数量、分数:" + city + scenics.size() + "、" + score);
+                }
 
+            }
+            /**
+             * 将经纬度坐标转换成geojson
+             */
+            if (page.getPage() == 6) {
+                //获取点信息
+                List<PointEntity> points = tourMapper.getPoint();
+                //将点信息转换成geojson
+                List<features> featuresList = new ArrayList<>();
+                for (PointEntity pe : points) {
+                    geometry geometry = new geometry();
+                    features features = new features();
+                    double[] xy = new double[]{pe.getX(), pe.getY()};
+                    geometry.setCoordinates(xy);
+
+                    features.setGeometry(geometry);
+                    features.setProperties(pe);
+                    featuresList.add(features);
+                }
+                return new ResponseInfo(EnumErrCode.OK, featuresList);
+            }
+            /**
+             *
+             */
+//            if (page.getPage() == 7) {
+//            }
+            return new ResponseInfo(EnumErrCode.OK, null);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
         }
-        return new ResponseInfo(EnumErrCode.OK, "ok", null);
     }
 
     /**
@@ -312,14 +355,44 @@ public class DataImpl implements DataService {
         }
     }
 
-    public ResponseInfo CityRank(){
+    /**
+     * 获取城市排行--以景点数量进行排名
+     *
+     * @return
+     */
+    public ResponseInfo CityRank() {
         try {
             long starttime = System.currentTimeMillis();
             log.info("城市排名查询-start  ");
 
-            List<CityRank>cityRanks =
+            List<CityRank> cityRanks = tourMapper.cityRank();
 
-            return new ResponseInfo(EnumErrCode.OK, null);
+            long endtime = System.currentTimeMillis();
+            log.info("城市排行-end  " + (endtime - starttime) + "ms");
+
+            return new ResponseInfo(EnumErrCode.OK, cityRanks);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    /**
+     * 景点推荐
+     */
+    public ResponseInfo Recommend(Recommend model) {
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("景点推荐-start  ");
+            QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
+            String sql = model.getType();
+            qw.like("type", sql);
+            qw.last("limit 10");
+            List<ScenicEntity> scenicEntities = scenicMapper.selectList(qw);
+
+            long endtime = System.currentTimeMillis();
+            log.info("景点推荐-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, scenicEntities);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());

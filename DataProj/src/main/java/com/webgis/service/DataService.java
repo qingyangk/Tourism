@@ -1,10 +1,7 @@
 package com.webgis.service;
 
 import com.webgis.ResponseInfo;
-import com.webgis.entity.PageEntity;
-import com.webgis.entity.Point;
-import com.webgis.entity.SearchEntity;
-import com.webgis.entity.Travel;
+import com.webgis.entity.*;
 
 import java.io.Serializable;
 
@@ -31,7 +28,7 @@ public interface DataService extends Serializable {
     /**
      * dis data
      */
-    ResponseInfo disData(PageEntity model);
+    ResponseInfo disData(SearchEntity model);
 
     /**
      * 查询游记
@@ -39,4 +36,8 @@ public interface DataService extends Serializable {
     ResponseInfo queryTravel(Travel model);
 
     ResponseInfo ScenicRank();
+
+    ResponseInfo CityRank();
+
+    ResponseInfo Recommend(Recommend model);
 }

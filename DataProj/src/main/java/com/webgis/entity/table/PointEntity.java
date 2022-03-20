@@ -7,6 +7,7 @@ import lombok.Data;
 @TableName("point")
 public class PointEntity {
     public int id;
+    public String name;
     public double x;
     public double y;
 }

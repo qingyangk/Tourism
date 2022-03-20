@@ -38,5 +38,7 @@ public interface TourMapper {
 
     void upCityScore(String city, int sccount, double scscore);
 
-    List<CityRank>
+    List<CityRank> cityRank();
+
+    List<PointEntity> getPoint();
 }

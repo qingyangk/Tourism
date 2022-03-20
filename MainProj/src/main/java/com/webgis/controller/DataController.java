@@ -1,10 +1,7 @@
 package com.webgis.controller;
 
 import com.webgis.ResponseInfo;
-import com.webgis.entity.PageEntity;
-import com.webgis.entity.Point;
-import com.webgis.entity.SearchEntity;
-import com.webgis.entity.Travel;
+import com.webgis.entity.*;
 import com.webgis.service.DataService;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,7 +51,7 @@ public class DataController {
      * 处理数据--景点与评论对应
      */
     @PostMapping("disData")
-    public ResponseInfo disData(@RequestBody PageEntity model) {
+    public ResponseInfo disData(@RequestBody SearchEntity model) {
         return dataService.disData(model);
     }
 
@@ -77,5 +74,21 @@ public class DataController {
     @GetMapping("scenicRank")
     public ResponseInfo ScenicRank() {
         return dataService.ScenicRank();
+    }
+
+    /**
+     * 获取城市排行
+     */
+    @GetMapping("cityRank")
+    public ResponseInfo CityRank() {
+        return dataService.CityRank();
+    }
+
+    /**
+     * 景点推荐接口
+     */
+    @PostMapping("recommend")
+    public ResponseInfo Recommend(@RequestBody Recommend model) {
+        return dataService.Recommend(model);
     }
 }
