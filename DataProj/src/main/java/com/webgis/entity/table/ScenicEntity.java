@@ -45,4 +45,6 @@ public class ScenicEntity {
 
     public int comrank;
 
+    public String level;
+
 }

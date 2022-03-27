@@ -35,9 +35,13 @@ public interface DataService extends Serializable {
      */
     ResponseInfo queryTravel(Travel model);
 
-    ResponseInfo ScenicRank();
+    ResponseInfo ScenicRank(Request type);
 
     ResponseInfo CityRank();
 
     ResponseInfo Recommend(Recommend model);
+
+    ResponseInfo ScenicID(ID model);
+
+    ResponseInfo ComMonth(Request model);
 }

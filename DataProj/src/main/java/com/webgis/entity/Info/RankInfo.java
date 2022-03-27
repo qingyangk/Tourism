@@ -12,4 +12,5 @@ public class RankInfo {
     public int hot;
     public double score;
     public int comrank;
+    public String level;
 }

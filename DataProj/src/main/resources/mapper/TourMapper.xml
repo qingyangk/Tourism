@@ -63,28 +63,33 @@
         from comment
     </select>
 
+    <!--    查询某城市有多少条评论-->
     <select id="cCount" resultType="int">
         select count(*)
         from comment
         where city = #{city}
     </select>
 
+    <!--    新表插入城市和评论数-->
     <insert id="inCC" parameterType="com.webgis.entity.table.CityRank">
         insert into cityrank(id, city, comcount)
         values (#{id}, #{city}, #{comcount})
     </insert>
 
+    <!--    查询该城市下的景点名及分数-->
     <select id="cScenicCount" resultType="com.webgis.entity.table.ScenicEntity">
         select name, score
         from info
         where city = #{city}
     </select>
 
+    <!--获取城市表城市名-->
     <select id="getcity" resultType="com.webgis.entity.table.CityRank">
         select city
         from cityrank
     </select>
 
+    <!--更新城市表的评论数和分数-->
     <update id="upCityScore" parameterType="com.webgis.entity.table.CityRank">
         update cityrank
         set sccount = #{sccount},
@@ -92,15 +97,52 @@
         where city = #{city}
     </update>
 
+    <!--查询排名前十的城市-->
     <select id="cityRank" resultType="com.webgis.entity.table.CityRank">
         select *
         from cityrank
         order by hotrank limit 0,10
     </select>
 
+    <!--获取点数据-->
     <select id="getPoint" resultType="com.webgis.entity.table.PointEntity">
         select *
         from point
+    </select>
+
+    <!--评论表中添加经纬度-->
+    <update id="upLaLg" parameterType="com.webgis.entity.table.CommentEntity">
+        update comment
+        set longitude = #{longitude},
+            latitude  = #{latitude}
+        where name = #{name}
+    </update>
+
+    <!--查询景点经纬度-->
+    <select id="queryLL" resultType="com.webgis.entity.table.ScenicEntity">
+        select name, x, y
+        from scenic
+    </select>
+
+    <!--查询评论坐标点-->
+    <select id="comPoint" resultType="com.webgis.entity.table.ComPoint">
+        select *
+        from compoint
+    </select>
+
+    <!--依据景点名称获取评论所有信息前20条-->
+    <select id="getComment" resultType="com.webgis.entity.table.CommentEntity">
+        select *
+        from comment
+        where name = #{name} limit 0,20
+    </select>
+
+    <!--依据景点名称获取评论-->
+    <select id="getCom" resultType="com.webgis.entity.table.CommentEntity">
+        select score
+        from comment
+        where name = #{name}
+          and date_format(date, '%m') = #{month}
     </select>
 
 

@@ -53,6 +53,7 @@ public class DataImpl implements DataService {
             int count = model.getCount();
             Page<ScenicEntity> page = new Page<>(pageNum, count);
             QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
+            qw.orderByAsc("comrank");
             Page<ScenicEntity> scenicInfo = scenicMapper.selectPage(page, qw);
 
             List<ScenicEntity> records = scenicInfo.getRecords();
@@ -255,30 +256,70 @@ public class DataImpl implements DataService {
 
             }
             /**
-             * 将经纬度坐标转换成geojson
+             * 将经纬度坐标转换成geojson--景点
              */
             if (page.getPage() == 6) {
                 //获取点信息
                 List<PointEntity> points = tourMapper.getPoint();
                 //将点信息转换成geojson
-                List<features> featuresList = new ArrayList<>();
+                List<GeoFeaScenic> geoFeaScenicList = new ArrayList<>();
                 for (PointEntity pe : points) {
                     geometry geometry = new geometry();
-                    features features = new features();
+                    GeoFeaScenic GeoFeaScenic = new GeoFeaScenic();
                     double[] xy = new double[]{pe.getX(), pe.getY()};
                     geometry.setCoordinates(xy);
 
-                    features.setGeometry(geometry);
-                    features.setProperties(pe);
-                    featuresList.add(features);
+                    GeoFeaScenic.setGeometry(geometry);
+                    GeoFeaScenic.setProperties(pe);
+                    geoFeaScenicList.add(GeoFeaScenic);
                 }
-                return new ResponseInfo(EnumErrCode.OK, featuresList);
+                return new ResponseInfo(EnumErrCode.OK, geoFeaScenicList);
             }
             /**
-             *
+             * 在评论表中添加经纬度
              */
-//            if (page.getPage() == 7) {
-//            }
+            if (page.getPage() == 7) {
+                //查询所有景点获取经纬度
+                List<ScenicEntity> scenicEntity = tourMapper.queryLL();
+                for (ScenicEntity entity : scenicEntity) {
+                    //用景点名称去找寻评论
+                    List<CoPC> copc = tourMapper.coPC(entity.getName());
+                    if (copc.size() == 0)
+                        continue;
+                    else {
+                        //添加经纬度
+                        double longitude = entity.getX();
+                        double latitude = entity.getY();
+                        tourMapper.upLaLg(longitude, latitude, entity.getName());
+                        String info = entity.getName() + " " + longitude + " " + latitude;
+                        log.info("add " + info);
+                    }
+                }
+            }
+            /**
+             * 将经纬度坐标转换成geojson--评论
+             */
+            if (page.getPage() == 8) {
+                //获取点信息
+                List<ComPoint> points = tourMapper.comPoint();
+                //将点信息转换成geojson
+                List<GeoFeaComment> geoFeaComments = new ArrayList<>();
+                for (ComPoint pe : points) {
+                    geometry geometry = new geometry();
+                    GeoFeaComment geoFeaComment = new GeoFeaComment();
+                    double[] xy = new double[]{pe.getLongitude(), pe.getLatitude()};
+                    geometry.setCoordinates(xy);
+
+                    geoFeaComment.setGeometry(geometry);
+                    geoFeaComment.setProperties(pe);
+                    geoFeaComments.add(geoFeaComment);
+                }
+                return new ResponseInfo(EnumErrCode.OK, geoFeaComments);
+            }
+
+            if (page.getPage() == 9) {
+
+            }
             return new ResponseInfo(EnumErrCode.OK, null);
         } catch (Exception ex) {
             log.error(ex.getMessage());
@@ -320,18 +361,24 @@ public class DataImpl implements DataService {
     }
 
     /**
-     * 获取景点排行--以热度和分数作为权重、level ！=null
+     * 获取景点排行--传入type
      *
      * @return
      */
-    public ResponseInfo ScenicRank() {
+    public ResponseInfo ScenicRank(Request model) {
+        String type = model.getModel();
+        if (type.equals("score"))
+            type = "scorerank";
+        else if (type.equals("hot"))
+            type = "hotrank";
+        else type = "comrank";
         try {
             long starttime = System.currentTimeMillis();
             log.info("景点排行-start  ");
 
             QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
-            qw.orderByAsc("comrank");
-            qw.ne("level", "null");
+            qw.orderByAsc(type);
+//            qw.ne("level", "null");
             qw.last("limit 10");
             List<ScenicEntity> entity = scenicMapper.selectList(qw);
             List<RankInfo> rankInfos = new ArrayList<>();
@@ -342,6 +389,11 @@ public class DataImpl implements DataService {
                 rankInfo.setComrank(en.getComrank());
                 rankInfo.setHot(en.getHot());
                 rankInfo.setScore(en.getScore());
+                String level = en.getLevel();
+                if (level.equals("null")) {
+                    level = "无";
+                }
+                rankInfo.setLevel(level);
                 rankInfos.add(rankInfo);
             }
 
@@ -385,8 +437,8 @@ public class DataImpl implements DataService {
             long starttime = System.currentTimeMillis();
             log.info("景点推荐-start  ");
             QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
-            String sql = model.getType();
-            qw.like("type", sql);
+            String sql = model.getLabel();
+            qw.like("label", sql);
             qw.last("limit 10");
             List<ScenicEntity> scenicEntities = scenicMapper.selectList(qw);
 
@@ -397,6 +449,47 @@ public class DataImpl implements DataService {
             log.error(ex.getMessage());
             return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
         }
+    }
+
+    /**
+     * 依据id查询景点表所有内容
+     */
+    public ResponseInfo ScenicID(ID model) {
+        int id = model.getId();
+        QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
+        qw.eq("id", id);
+        List<ScenicEntity> scenic = scenicMapper.selectList(qw);
+        List<CommentEntity> comment = new ArrayList<>();
+        if (scenic.size() != 0) {
+            String name = scenic.get(0).getName();
+            comment = tourMapper.getComment(name);
+        }
+        AllInfo allInfo = new AllInfo();
+        allInfo.setScenicEntity(scenic.get(0));
+        allInfo.setCommentEntity(comment);
+        return new ResponseInfo(EnumErrCode.OK, allInfo);
+    }
+
+    /**
+     * 景点评论数据月份统计
+     */
+    public ResponseInfo ComMonth(Request model) {
+        String name = model.getModel();
+        int[] comcount = new int[12];
+        double[] scoreavg = new double[12];
+        for (int i = 1; i < 12; i++) {
+            List<CommentEntity> comment = tourMapper.getCom(name, i);
+            double sum = 0;
+            for (CommentEntity co : comment) {
+                sum += co.getScore();
+            }
+            comcount[i - 1] = comment.size();
+            scoreavg[i - 1] = sum / comment.size();
+        }
+        CommentMonth commentMonth = new CommentMonth();
+        commentMonth.setComcount(comcount);
+        commentMonth.setScoreavg(scoreavg);
+        return new ResponseInfo(EnumErrCode.OK, commentMonth);
     }
 
     /**

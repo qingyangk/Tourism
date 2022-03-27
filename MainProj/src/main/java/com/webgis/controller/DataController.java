@@ -71,9 +71,9 @@ public class DataController {
      *
      * @return
      */
-    @GetMapping("scenicRank")
-    public ResponseInfo ScenicRank() {
-        return dataService.ScenicRank();
+    @PostMapping("scenicRank")
+    public ResponseInfo ScenicRank(@RequestBody Request type) {
+        return dataService.ScenicRank(type);
     }
 
     /**
@@ -90,5 +90,21 @@ public class DataController {
     @PostMapping("recommend")
     public ResponseInfo Recommend(@RequestBody Recommend model) {
         return dataService.Recommend(model);
+    }
+
+    /**
+     * 依据id查询景点所有信息
+     */
+    @PostMapping("scenicID")
+    public ResponseInfo ScenicID(@RequestBody ID model) {
+        return dataService.ScenicID(model);
+    }
+
+    /**
+     * 查询该景点的月度评论数据
+     */
+    @PostMapping("comMonth")
+    public ResponseInfo ComMonth(@RequestBody Request model) {
+        return dataService.ComMonth(model);
     }
 }

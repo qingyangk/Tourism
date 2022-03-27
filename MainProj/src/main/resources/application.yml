@@ -20,12 +20,12 @@ spring:
           driverClassName: com.mysql.cj.jdbc.Driver
           validationQuery: SELECT 1 FROM DUAL
         # 从库 SqlServer
-        SqlServer:
-          driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-          url: jdbc:sqlserver://114.98.239.36:1433;DatabaseName=tour
-          username: sa
-          password: doorplate.123
-          validation-query: SELECT 1
+#        SqlServer:
+#          driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#          url: jdbc:sqlserver://114.98.239.36:1433;DatabaseName=tour
+#          username: sa
+#          password: doorplate.123
+#          validation-query: SELECT 1
 
       druid:
         # 初始化建立的物理连接数
