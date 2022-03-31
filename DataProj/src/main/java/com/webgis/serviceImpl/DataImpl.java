@@ -87,7 +87,8 @@ public class DataImpl implements DataService {
             int count = model.getCount();
             Page<ScenicEntity> page = new Page<>(pageNum, count);
             QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
-            qw.like("Name", sql);
+            qw.like("Name", sql).or().like("city", sql);
+            qw.orderByAsc("comrank");
             Page<ScenicEntity> searchInfo = scenicMapper.selectPage(page, qw);
 
             List<ScenicEntity> records = searchInfo.getRecords();
@@ -329,9 +330,6 @@ public class DataImpl implements DataService {
 
     /**
      * 游记查询
-     *
-     * @param model
-     * @return
      */
     public ResponseInfo queryTravel(Travel model) {
         try {
@@ -438,7 +436,8 @@ public class DataImpl implements DataService {
             log.info("景点推荐-start  ");
             QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
             String sql = model.getLabel();
-            qw.like("label", sql);
+            qw.like("label", sql).or().like("name", sql);
+            qw.orderByAsc("comrank");
             qw.last("limit 10");
             List<ScenicEntity> scenicEntities = scenicMapper.selectList(qw);
 
@@ -455,6 +454,9 @@ public class DataImpl implements DataService {
      * 依据id查询景点表所有内容
      */
     public ResponseInfo ScenicID(ID model) {
+        long starttime = System.currentTimeMillis();
+        log.info("景点查询-start  ");
+
         int id = model.getId();
         QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
         qw.eq("id", id);
@@ -467,6 +469,9 @@ public class DataImpl implements DataService {
         AllInfo allInfo = new AllInfo();
         allInfo.setScenicEntity(scenic.get(0));
         allInfo.setCommentEntity(comment);
+
+        long endtime = System.currentTimeMillis();
+        log.info("景点查询-end  " + (endtime - starttime) + "ms");
         return new ResponseInfo(EnumErrCode.OK, allInfo);
     }
 
@@ -474,21 +479,32 @@ public class DataImpl implements DataService {
      * 景点评论数据月份统计
      */
     public ResponseInfo ComMonth(Request model) {
+        long starttime = System.currentTimeMillis();
+        log.info("景点月份评论-start  ");
+
         String name = model.getModel();
         int[] comcount = new int[12];
         double[] scoreavg = new double[12];
-        for (int i = 1; i < 12; i++) {
-            List<CommentEntity> comment = tourMapper.getCom(name, i);
-            double sum = 0;
+        List<CommentEntity> comment = tourMapper.getCom(name);
+        for (int i = 1; i <= 12; i++) {
+            int sum = 0;
+            double score = 0;
             for (CommentEntity co : comment) {
-                sum += co.getScore();
+                int month = Integer.parseInt(co.getDate().substring(5, 7));
+                if (i != month)
+                    continue;
+                sum++;
+                score += co.getScore();
             }
-            comcount[i - 1] = comment.size();
-            scoreavg[i - 1] = sum / comment.size();
+            scoreavg[i - 1] = score / sum;
+            comcount[i - 1] = sum;
         }
         CommentMonth commentMonth = new CommentMonth();
         commentMonth.setComcount(comcount);
         commentMonth.setScoreavg(scoreavg);
+
+        long endtime = System.currentTimeMillis();
+        log.info("景点月份评论-end  " + (endtime - starttime) + "ms");
         return new ResponseInfo(EnumErrCode.OK, commentMonth);
     }
 

@@ -139,10 +139,9 @@
 
     <!--依据景点名称获取评论-->
     <select id="getCom" resultType="com.webgis.entity.table.CommentEntity">
-        select score
+        select score,date
         from comment
         where name = #{name}
-          and date_format(date, '%m') = #{month}
     </select>
 
 

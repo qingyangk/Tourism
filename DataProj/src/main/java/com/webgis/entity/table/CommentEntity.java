@@ -14,7 +14,7 @@ public class CommentEntity {
     public String website;
     public String name;
     public String author;
-    public Date date;
+    public String date;
     public String place;
     public double score;
     public String pinglun;

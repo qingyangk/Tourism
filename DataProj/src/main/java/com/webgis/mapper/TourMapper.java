@@ -69,5 +69,5 @@ public interface TourMapper {
     List<CommentEntity> getComment(String name);
 
     //依据景点名称获取评论
-    List<CommentEntity> getCom(String name,int month);
+    List<CommentEntity> getCom(String name);
 }
