@@ -107,4 +107,12 @@ public class DataController {
     public ResponseInfo ComMonth(@RequestBody Request model) {
         return dataService.ComMonth(model);
     }
+
+    /**
+     * 城市评论
+     */
+    @PostMapping("cityCom")
+    public ResponseInfo CityComment(@RequestBody Request model) {
+        return dataService.CityComment(model);
+    }
 }

@@ -36,15 +36,32 @@ public interface DataService extends Serializable {
     ResponseInfo queryTravel(Travel model);
 
     /**
-     * che
+     * 景点排行
      */
     ResponseInfo ScenicRank(Request type);
 
+    /**
+     * 城市排行
+     */
     ResponseInfo CityRank();
 
+    /**
+     * 景点推荐
+     */
     ResponseInfo Recommend(Recommend model);
 
+    /**
+     * id匹配所有景点
+     */
     ResponseInfo ScenicID(ID model);
 
+    /**
+     * 月度评论
+     */
     ResponseInfo ComMonth(Request model);
+
+    /**
+     * 城市评论查询
+     */
+    ResponseInfo CityComment(Request model);
 }

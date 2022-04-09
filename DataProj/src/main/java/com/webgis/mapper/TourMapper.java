@@ -70,4 +70,10 @@ public interface TourMapper {
 
     //依据景点名称获取评论
     List<CommentEntity> getCom(String name);
+
+    //南京景点表--景点推荐查询
+    List<NanJingEntity> nanjingRe(String preference);
+
+    //获取城市评论--前20条
+    List<CommentEntity> cityCom(String city);
 }

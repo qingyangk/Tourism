@@ -19,13 +19,13 @@ spring:
           password: Chzu123456
           driverClassName: com.mysql.cj.jdbc.Driver
           validationQuery: SELECT 1 FROM DUAL
-        # 从库 SqlServer
-        SqlServer:
-          driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-          url: jdbc:sqlserver://114.98.239.36:1433;DatabaseName=tour
-          username: sa
-          password: doorplate.123
-          validation-query: SELECT 1
+        # 从库 SqlServer,命名可以自己定，
+#        SqlServer:
+#          driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#          url: jdbc:sqlserver://114.98.239.36:1433;DatabaseName=tour
+#          username: sa
+#          password: doorplate.123
+#          validation-query: SELECT 1
 
       druid:
         # 初始化建立的物理连接数
@@ -49,7 +49,10 @@ spring:
         #      time-between-eviction-runs-millis: 60000
         # 连接保持空闲而不被驱逐的最小时间
         #      min-evictable-idle-time-millis: 300000
-
+mybatis-plus:
+  configuration:
+    # 打印 mybatis的SQL语句，方便查看
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 
 

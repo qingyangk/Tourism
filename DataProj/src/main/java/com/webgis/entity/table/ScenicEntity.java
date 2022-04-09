@@ -41,7 +41,7 @@ public class ScenicEntity {
     public double score;
 
     @TableId(value = "id", type = IdType.AUTO)
-    public int id;
+    public Integer id;
 
     public int comrank;
 

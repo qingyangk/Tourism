@@ -139,9 +139,22 @@
 
     <!--依据景点名称获取评论-->
     <select id="getCom" resultType="com.webgis.entity.table.CommentEntity">
-        select score,date
+        select score, date
         from comment
         where name = #{name}
+    </select>
+
+    <!--南京景点推荐-->
+    <select id="nanjingRe" resultType="com.webgis.entity.table.NanJingEntity">
+        select *
+        from 南京景点
+        order by ${preference} ASC
+    </select>
+    <!--城市评论-->
+    <select id="cityCom" resultType="com.webgis.entity.table.CommentEntity">
+        select *
+        from comment
+        where city = #{city} limit 0,20
     </select>
 
 

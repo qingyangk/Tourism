@@ -413,7 +413,7 @@ public class DataImpl implements DataService {
     public ResponseInfo CityRank() {
         try {
             long starttime = System.currentTimeMillis();
-            log.info("城市排名查询-start  ");
+            log.info("城市排行-start  ");
 
             List<CityRank> cityRanks = tourMapper.cityRank();
 
@@ -434,16 +434,42 @@ public class DataImpl implements DataService {
         try {
             long starttime = System.currentTimeMillis();
             log.info("景点推荐-start  ");
-            QueryWrapper<ScenicEntity> qw = new QueryWrapper<>();
-            String sql = model.getLabel();
-            qw.like("label", sql).or().like("name", sql);
-            qw.orderByAsc("comrank");
-            qw.last("limit 10");
-            List<ScenicEntity> scenicEntities = scenicMapper.selectList(qw);
+
+            String[] label = model.getLabel();
+            String preference = model.getPreference();
+            if (preference.equals("hot")) {
+                preference = "hotrank";
+            } else if (preference.equals("score")) {
+                preference = "scorerank";
+            } else {
+                preference = "comrank";
+            }
+
+            List<NanJingEntity> nanJingEntities = tourMapper.nanjingRe(preference);
+            List<NanJingEntity> nanjingInfo = new ArrayList<>();
+            for (NanJingEntity na : nanJingEntities) {
+                for (String lb : label) {
+                    if (lb.equals(na.getLabel1())) {
+                        nanjingInfo.add(na);
+                        break;
+                    }
+                    if (lb.equals(na.getLabel2())) {
+                        nanjingInfo.add(na);
+                        break;
+                    }
+                    if (lb.equals(na.getLabel3())) {
+                        nanjingInfo.add(na);
+                        break;
+                    }
+                }
+            }
+            if (nanjingInfo.isEmpty()) {
+                nanjingInfo = nanJingEntities.subList(0, 10);
+            }
 
             long endtime = System.currentTimeMillis();
             log.info("景点推荐-end  " + (endtime - starttime) + "ms");
-            return new ResponseInfo(EnumErrCode.OK, scenicEntities);
+            return new ResponseInfo(EnumErrCode.OK, nanjingInfo);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
@@ -508,6 +534,11 @@ public class DataImpl implements DataService {
         return new ResponseInfo(EnumErrCode.OK, commentMonth);
     }
 
+    public ResponseInfo CityComment(Request model) {
+        List<CommentEntity> com = tourMapper.cityCom(model.getModel());
+        return new ResponseInfo(EnumErrCode.OK, com);
+    }
+
     /**
      * 分页 传入当前页数及要素个数
      * 返回最大值、最小值、及页面总数
@@ -569,25 +600,3 @@ public class DataImpl implements DataService {
         return c;
     }
 }
-
-//老兵之凋零，残破的代码
-//            Page<ScenicEntity> obj = new Page<ScenicEntity>(2, 8);
-//            IPage<ScenicEntity> formInfo = scenicMapper.selectPage(obj, qw);
-//            Map<String, Integer> map = getPage(scenicEntity.size(), model.getPage(), model.getCount());
-//            List<ScenicInfo> ScInfos = new ArrayList<>();
-//            int count = 0;
-//            int minCount = map.get("min");
-//            int maxCount = map.get("max");
-//            for (ScenicEntity entity : scenicEntity) {
-//                count++;
-//                if (count > minCount && count <= maxCount) {
-//                    ScenicInfo scInfo = new ScenicInfo();
-//                    scInfo.message = entity.getJianjie();
-//                    scInfo.address = entity.getAddress();
-//                    scInfo.name = entity.getName();
-//                    scInfo.X = entity.getX();
-//                    scInfo.Y = entity.getY();
-//                    scInfo.id = entity.getId();
-//                    ScInfos.add(scInfo);
-//                }
-//            }
