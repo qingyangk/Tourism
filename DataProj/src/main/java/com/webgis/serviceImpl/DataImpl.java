@@ -13,9 +13,13 @@ import com.webgis.mapper.TourMapper;
 import com.webgis.mapper.TravelMapper;
 import com.webgis.service.DataService;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
 import org.springframework.stereotype.Service;
+import org.xmlunit.util.IterableNodeList;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -534,9 +538,71 @@ public class DataImpl implements DataService {
         return new ResponseInfo(EnumErrCode.OK, commentMonth);
     }
 
+    /**
+     * 获取城市评论数
+     */
     public ResponseInfo CityComment(Request model) {
         List<CommentEntity> com = tourMapper.cityCom(model.getModel());
         return new ResponseInfo(EnumErrCode.OK, com);
+    }
+
+    /**
+     * 获取时间段的天数评论
+     */
+    public ResponseInfo CommentDay() {
+        long starttime = System.currentTimeMillis();
+        log.info("年份天数评论-start  ");
+
+        try {
+
+
+            List<CommentEntity> times = tourMapper.lastCom();
+            String endDate = times.get(0).getDate().substring(0, 10);
+            int year = Integer.parseInt(endDate.substring(0, 4)) - 1;
+            String startDate = year + endDate.substring(4, 10);
+
+            List<Integer> scores = new ArrayList<>();
+            List<Integer> travelDay = new ArrayList<>();
+            List<Integer> dayCount = new ArrayList<>();
+            List<CommentDay> commentDays = tourMapper.commentDay(startDate, endDate);
+            List<CommentDay> travelDays = tourMapper.travelDay(startDate, endDate);
+
+            for (CommentDay cd : commentDays) {
+                dayCount.add(cd.getCount());
+                scores.add(cd.getScore());
+            }
+            for (CommentDay cd : travelDays) {
+                travelDay.add(cd.getCount());
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("starttime", startDate);
+            data.put("endtime", endDate);
+            data.put("startStamp", dateToStamp(startDate));
+            data.put("endStamp", dateToStamp(endDate));
+            data.put("daycount", dayCount.toArray());
+            data.put("favorable", scores.toArray());
+            data.put("travel", travelDay.toArray());
+            long endtime = System.currentTimeMillis();
+            log.info("年份天数评论-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, data);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+
+    }
+
+    public ResponseInfo ScenicDay(Request model) {
+        long starttime = System.currentTimeMillis();
+        log.info("当天景点评论数-start  ");
+
+        String time = model.getModel();
+        List<ScenicDay> scenicDays = tourMapper.ScenicDay(time);
+
+        long endtime = System.currentTimeMillis();
+        log.info("当天景点评论数-end  " + (endtime - starttime) + "ms");
+        return new ResponseInfo(EnumErrCode.OK, scenicDays);
     }
 
     /**
@@ -598,5 +664,15 @@ public class DataImpl implements DataService {
                 c = true;//条件都满足是，布尔为truec = !c;
         }
         return c;
+    }
+
+    /**
+     * 时间转换时间戳
+     */
+    public long dateToStamp(String time) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = simpleDateFormat.parse(time);
+        long ts = date.getTime();
+        return ts;
     }
 }

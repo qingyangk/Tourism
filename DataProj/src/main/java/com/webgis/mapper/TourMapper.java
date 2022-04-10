@@ -1,5 +1,7 @@
 package com.webgis.mapper;
 
+import com.webgis.entity.CommentDay;
+import com.webgis.entity.ScenicDay;
 import com.webgis.entity.table.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
@@ -76,4 +78,13 @@ public interface TourMapper {
 
     //获取城市评论--前20条
     List<CommentEntity> cityCom(String city);
+
+    //获取评论表中的最新的时间
+    List<CommentEntity> lastCom();
+
+    List<CommentDay> commentDay(String startDate, String endDate);
+
+    List<ScenicDay> ScenicDay(String time);
+
+    List<CommentDay> travelDay(String startDate, String endDate);
 }

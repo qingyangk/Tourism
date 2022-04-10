@@ -115,4 +115,17 @@ public class DataController {
     public ResponseInfo CityComment(@RequestBody Request model) {
         return dataService.CityComment(model);
     }
+
+    /**
+     * 获取时间段的天数评论
+     */
+    @PostMapping("commentDay")
+    public ResponseInfo CommentDay() {
+        return dataService.CommentDay();
+    }
+
+    @PostMapping("scenicDay")
+    public ResponseInfo ScenicDay(@RequestBody Request model) {
+        return dataService.ScenicDay(model);
+    }
 }

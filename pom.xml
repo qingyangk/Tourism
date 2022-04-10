@@ -18,6 +18,7 @@
         <module>MainProj</module>
         <module>ResponseProj</module>
         <module>DataProj</module>
+        <module>CalculateProj</module>
     </modules>
 
     <!--管理项目-->

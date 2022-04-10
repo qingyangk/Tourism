@@ -64,4 +64,14 @@ public interface DataService extends Serializable {
      * 城市评论查询
      */
     ResponseInfo CityComment(Request model);
+
+    /**
+     * 获取时间段的天数评论
+     */
+    ResponseInfo CommentDay();
+
+    /**
+     * 获取某一天景点的评论
+     */
+    ResponseInfo ScenicDay(Request model);
 }
