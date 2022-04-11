@@ -520,7 +520,7 @@ public class DataImpl implements DataService {
             int sum = 0;
             double score = 0;
             for (CommentEntity co : comment) {
-                int month = Integer.parseInt(co.getDate().substring(5, 7));
+                int month = Integer.parseInt(co.getReleaseTime().substring(5, 7));
                 if (i != month)
                     continue;
                 sum++;
@@ -550,17 +550,16 @@ public class DataImpl implements DataService {
      * 获取时间段的天数评论
      */
     public ResponseInfo CommentDay() {
-        long starttime = System.currentTimeMillis();
-        log.info("年份天数评论-start  ");
-
         try {
-
+            long starttime = System.currentTimeMillis();
+            log.info("年份天数评论-start  ");
 
             List<CommentEntity> times = tourMapper.lastCom();
-            String endDate = times.get(0).getDate().substring(0, 10);
+            String endDate = times.get(0).getReleaseTime().substring(0, 7);
             int year = Integer.parseInt(endDate.substring(0, 4)) - 1;
-            String startDate = year + endDate.substring(4, 10);
-
+            int month = Integer.parseInt(endDate.substring(5, 7)) - 1;
+            String startDate = year + endDate.substring(4, 7);
+            endDate = (year + 1) + "-0" + month;
             List<Integer> scores = new ArrayList<>();
             List<Integer> travelDay = new ArrayList<>();
             List<Integer> dayCount = new ArrayList<>();
@@ -578,8 +577,8 @@ public class DataImpl implements DataService {
             Map<String, Object> data = new HashMap<>();
             data.put("starttime", startDate);
             data.put("endtime", endDate);
-            data.put("startStamp", dateToStamp(startDate));
-            data.put("endStamp", dateToStamp(endDate));
+            data.put("startStamp", dateToStamp(startDate + "-01"));
+            data.put("endStamp", dateToStamp(endDate + "-01"));
             data.put("daycount", dayCount.toArray());
             data.put("favorable", scores.toArray());
             data.put("travel", travelDay.toArray());

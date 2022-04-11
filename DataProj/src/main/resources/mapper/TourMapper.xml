@@ -139,7 +139,7 @@
 
     <!--依据景点名称获取评论-->
     <select id="getCom" resultType="com.webgis.entity.table.CommentEntity">
-        select score, date
+        select score, release_time
         from comment
         where name = #{name}
     </select>
@@ -160,38 +160,38 @@
 
     <!--获取表中最新的时间-->
     <select id="lastCom" resultType="com.webgis.entity.table.CommentEntity">
-        select date
+        select release_time
         from comment
-        ORDER BY date DESC LIMIT 1
+        ORDER BY release_time DESC LIMIT 1
     </select>
 
     <select id="commentDay" resultType="com.webgis.entity.CommentDay">
-        SELECT date, count(*)as count, sum(score=5)as score
+        SELECT release_time, count(*)as count, sum(score=5)as score
         FROM 评论总表
-        GROUP BY date
-        HAVING DATE_FORMAT(date
+        GROUP BY release_time
+        HAVING DATE_FORMAT(release_time
              , '%Y-%m') BETWEEN #{startDate}
            AND #{endDate}
-        ORDER BY date
+        ORDER BY release_time
     </select>
 
     <select id="ScenicDay" resultType="com.webgis.entity.ScenicDay">
         SELECT name, count(*)as count
         FROM comment
-        WHERE date =#{time}
+        WHERE release_time =#{time}
         GROUP BY name
         ORDER BY count DESC
             LIMIT 0, 10
     </select>
 
     <select id="travelDay" resultType="com.webgis.entity.CommentDay">
-        SELECT time_release as date, count(*)as count
+        SELECT release_time, count(*)as count
         FROM `游记总表`
-        GROUP BY time_release
-        HAVING DATE_FORMAT(time_release
+        GROUP BY release_time
+        HAVING DATE_FORMAT(release_time
              , '%Y-%m') BETWEEN #{startDate}
            AND #{endDate}
-        ORDER BY time_release
+        ORDER BY release_time
     </select>
 
 

@@ -1,9 +1,8 @@
 package com.webgis.entity.table;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-
-import java.util.Date;
 
 /**
  * 评论表实体
@@ -11,14 +10,17 @@ import java.util.Date;
 @Data
 @TableName("comment")
 public class CommentEntity {
+    public Integer id;
     public String website;
-    public String name;
+    public String scenicName;
     public String author;
-    public String date;
-    public String place;
+
+    @TableField("release_time")
+    public String releaseTime;
+
+    public String authorPlace;
     public double score;
-    public String pinglun;
-    public String biaoshi;
+    public String content;
     public String province;
     public String city;
     public double longitude;
