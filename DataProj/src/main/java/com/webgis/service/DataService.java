@@ -74,4 +74,30 @@ public interface DataService extends Serializable {
      * 获取某一天景点的评论
      */
     ResponseInfo ScenicDay(Request model);
+
+    ResponseInfo CityDay(Request model);
+
+    ResponseInfo GetSCT();
+
+    ResponseInfo GetWordCloud(Request model);
+
+    ResponseInfo OutPutPassengerFlow(FlowRequest flow);
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 评论分数
+     */
+    ResponseInfo OutPutScore(FlowRequest flow);
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 评论日期变化
+     */
+    ResponseInfo OutPutDay(FlowRequest flow);
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 景点数量
+     */
+    ResponseInfo OPScenicRank(FlowRequest flow);
 }

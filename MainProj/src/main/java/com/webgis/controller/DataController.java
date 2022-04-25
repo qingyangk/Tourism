@@ -20,8 +20,6 @@ public class DataController {
 
     /**
      * 表格基本信息展示
-     *
-     * @return
      */
     @PostMapping("queryScenic")
     public ResponseInfo queryScenic(@RequestBody PageEntity model) {
@@ -30,9 +28,6 @@ public class DataController {
 
     /**
      * 表格信息搜索
-     *
-     * @param model
-     * @return
      */
     @PostMapping("searchScenic")
     public ResponseInfo searchScenic(@RequestBody SearchEntity model) {
@@ -57,9 +52,6 @@ public class DataController {
 
     /**
      * 获取城市游记
-     *
-     * @param model
-     * @return
      */
     @PostMapping("cityTravel")
     public ResponseInfo queryTravel(@RequestBody Travel model) {
@@ -68,8 +60,6 @@ public class DataController {
 
     /**
      * 查询景点排行
-     *
-     * @return
      */
     @PostMapping("scenicRank")
     public ResponseInfo ScenicRank(@RequestBody Request type) {
@@ -124,8 +114,71 @@ public class DataController {
         return dataService.CommentDay();
     }
 
+    /**
+     * 日期景点评论数--传入年月
+     */
     @PostMapping("scenicDay")
     public ResponseInfo ScenicDay(@RequestBody Request model) {
         return dataService.ScenicDay(model);
+    }
+
+    /**
+     * 城市每月评论热度
+     */
+    @PostMapping("cityDay")
+    public ResponseInfo CityDay(@RequestBody Request model) {
+        return dataService.CityDay(model);
+    }
+
+    /**
+     * 景点数、评论数、游记数获取
+     */
+    @GetMapping("getSCT")
+    public ResponseInfo GetSCT() {
+        return dataService.GetSCT();
+    }
+
+    /**
+     * 获取词云
+     */
+    @PostMapping("wordCloud")
+    public ResponseInfo GetWordCloud(@RequestBody Request model) {
+        return dataService.GetWordCloud(model);
+    }
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 评论数量
+     */
+    @PostMapping("outPut")
+    public ResponseInfo OutPutPassengerFlow(@RequestBody FlowRequest flow) {
+        return dataService.OutPutPassengerFlow(flow);
+    }
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 评论分数
+     */
+    @PostMapping("opScore")
+    public ResponseInfo OutPutScore(@RequestBody FlowRequest flow) {
+        return dataService.OutPutScore(flow);
+    }
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 评论日期变化
+     */
+    @PostMapping("opDay")
+    public ResponseInfo OutPutDay(@RequestBody FlowRequest flow) {
+        return dataService.OutPutDay(flow);
+    }
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 景点数量
+     */
+    @PostMapping("opScenic")
+    public ResponseInfo OPScenicRank(@RequestBody FlowRequest flow) {
+        return dataService.OPScenicRank(flow);
     }
 }

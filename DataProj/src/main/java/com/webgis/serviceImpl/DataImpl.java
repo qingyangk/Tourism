@@ -13,9 +13,7 @@ import com.webgis.mapper.TourMapper;
 import com.webgis.mapper.TravelMapper;
 import com.webgis.service.DataService;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
 import org.springframework.stereotype.Service;
-import org.xmlunit.util.IterableNodeList;
 
 import javax.annotation.Resource;
 import java.text.ParseException;
@@ -44,9 +42,6 @@ public class DataImpl implements DataService {
 
     /**
      * 表格信息展示接口
-     *
-     * @param model
-     * @return
      */
     public ResponseInfo queryScenic(PageEntity model) {
         try {
@@ -592,25 +587,262 @@ public class DataImpl implements DataService {
 
     }
 
+    /**
+     * 日期景点评论数--传入年月
+     */
     public ResponseInfo ScenicDay(Request model) {
         long starttime = System.currentTimeMillis();
-        log.info("当天景点评论数-start  ");
+        log.info("月份景点评论数-start  ");
 
         String time = model.getModel();
         List<ScenicDay> scenicDays = tourMapper.ScenicDay(time);
+        List<String> scenic = new ArrayList<>();
+        List<Integer> count = new ArrayList<>();
+        List<ScenicDayInfo> dayInfos = new ArrayList<>();
+        String date = "";
+        for (ScenicDay sd : scenicDays) {
+            if (!date.equals(sd.getDate()) && scenic.size() == 20) {
+                date = sd.getDate();
+                ScenicDayInfo dayInfo = new ScenicDayInfo();
+                dayInfo.setScenic(scenic.toArray());
+                dayInfo.setDate(date);
+                dayInfo.setCount(count.toArray());
+                dayInfos.add(dayInfo);
+                scenic = new ArrayList<>();
+                count = new ArrayList<>();
+            }
+            if (scenic.size() < 20) {
+                scenic.add(sd.getName());
+                count.add(sd.getCount());
+            }
+        }
 
         long endtime = System.currentTimeMillis();
-        log.info("当天景点评论数-end  " + (endtime - starttime) + "ms");
-        return new ResponseInfo(EnumErrCode.OK, scenicDays);
+        log.info("月份景点评论数-end  " + (endtime - starttime) + "ms");
+        return new ResponseInfo(EnumErrCode.OK, dayInfos);
+    }
+
+    /**
+     * 城市每月评论热度
+     */
+    public ResponseInfo CityDay(Request model) {
+        long starttime = System.currentTimeMillis();
+        log.info("月份城市评论数-start  ");
+
+        String time = model.getModel();
+        List<ScenicDay> scenicDays = tourMapper.CityDay(time);
+        List<String> city = new ArrayList<>();
+        List<Integer> count = new ArrayList<>();
+        List<CityDayInfo> dayInfos = new ArrayList<>();
+        String date = "";
+        for (ScenicDay sd : scenicDays) {
+            if (!date.equals(sd.getDate()) && city.size() == 20) {
+                date = sd.getDate();
+                CityDayInfo dayInfo = new CityDayInfo();
+                dayInfo.setCity(city.toArray());
+                dayInfo.setDate(date);
+                dayInfo.setCount(count.toArray());
+                dayInfos.add(dayInfo);
+                city = new ArrayList<>();
+                count = new ArrayList<>();
+            }
+            if (city.size() < 20) {
+                city.add(sd.getName());
+                count.add(sd.getCount());
+            }
+        }
+
+        long endtime = System.currentTimeMillis();
+        log.info("月份城市评论数-end  " + (endtime - starttime) + "ms");
+        return new ResponseInfo(EnumErrCode.OK, dayInfos);
+    }
+
+    /**
+     * 景点数、评论数、游记数获取
+     */
+    public ResponseInfo GetSCT() {
+        List<SCT> list = tourMapper.GetSCT();
+        Map<String, Long> data = new HashMap<>();
+        data.put("scenic", list.get(0).getInfo());
+        data.put("comment", list.get(1).getInfo());
+        data.put("travel", list.get(2).getInfo());
+        return new ResponseInfo(EnumErrCode.OK, data);
+    }
+
+    /**
+     * 获取词云
+     */
+    public ResponseInfo GetWordCloud(Request model) {
+        long starttime = System.currentTimeMillis();
+        log.info("城市词云-start  ");
+
+        String city = model.getModel();
+        List<WordCloud> wordClouds = tourMapper.GetWC(city);
+        String word = wordClouds.get(0).getWord();
+        String frequency = wordClouds.get(0).getFrequency();
+
+        //消除符号及分割
+        word = word.replaceAll("\\[|\\]", "");
+        frequency = frequency.replaceAll("\\[|\\]", "");
+        String[] arrword = word.split(",");
+        String[] arrfrequency = frequency.split(",");
+
+        List<WordCloudInfo> wordCloudList = new ArrayList<>();
+        for (int i = 0; i < arrword.length; i++) {
+            WordCloudInfo wordCloudInfo = new WordCloudInfo();
+            wordCloudInfo.setName(arrword[i].replace(" ", ""));
+            wordCloudInfo.setValue(Integer.parseInt(arrfrequency[i].replace(" ", "")));
+            wordCloudList.add(wordCloudInfo);
+        }
+
+        long endtime = System.currentTimeMillis();
+        log.info("城市词云-end  " + (endtime - starttime) + "ms");
+        return new ResponseInfo(EnumErrCode.OK, wordCloudList);
+    }
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 评论数量
+     */
+    public ResponseInfo OutPutPassengerFlow(FlowRequest flow) {
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("客流分析-评论数量-start  ");
+
+            String place = flow.getModel();
+            String cORp = "province";
+            if (flow.getType() == 1) {
+                cORp = "city";
+            }
+            List<FlowEntity> flowEntities;
+            if (flow.getPath() == 1) {
+                flowEntities = tourMapper.PutFlow(cORp, place);
+            } else {
+                flowEntities = tourMapper.OutFlow(cORp, place);
+            }
+
+            long endtime = System.currentTimeMillis();
+            log.info("客流分析-评论数量-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, flowEntities);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 评论分数
+     */
+    public ResponseInfo OutPutScore(FlowRequest flow) {
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("客流分析-评论分数-start  ");
+
+            String place = flow.getModel();
+            String cORp = "province";
+            if (flow.getType() == 1) {
+                cORp = "city";
+            }
+            List<OPScore> flowEntities;
+            if (flow.getPath() == 1) {
+                flowEntities = tourMapper.PutScore(cORp, place);
+            } else {
+                flowEntities = tourMapper.OutScore(cORp, place);
+            }
+
+            long endtime = System.currentTimeMillis();
+            log.info("客流分析-评论分数-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, flowEntities);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 评论日期变化
+     */
+    public ResponseInfo OutPutDay(FlowRequest flow) {
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("客流分析-评论日期变化-start  ");
+
+            String place = flow.getModel();
+            String cORp = "province";
+            if (flow.getType() == 1) {
+                cORp = "city";
+            }
+            List<OPDay> opDays;
+            if (flow.getPath() == 1) {
+                opDays = tourMapper.PutDay(cORp, place);
+            } else {
+                opDays = tourMapper.OutDay(place);
+            }
+
+            List<String> time = new ArrayList<>();
+            List<Integer> count = new ArrayList<>();
+            for (OPDay day : opDays) {
+                time.add(day.getReleaseTime());
+                count.add(day.getCount());
+            }
+            Map<String, Object> data = new HashMap<>();
+//            data.put("time", time.toArray());
+            data.put("count", count.toArray());
+
+            long endtime = System.currentTimeMillis();
+            log.info("客流分析-评论日期变化-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, data);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 景点数量
+     */
+    public ResponseInfo OPScenicRank(FlowRequest flow) {
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("客流分析-景点数量-start  ");
+
+            String place = flow.getModel();
+            String cORp = "province";
+            if (flow.getType() == 1) {
+                cORp = "city";
+            }
+            List<FlowEntity> flowEntities;
+            if (flow.getPath() == 1) {
+                flowEntities = tourMapper.PutScenic(cORp, place);
+            } else {
+                flowEntities = tourMapper.OutScenic(place);
+            }
+            List<String> scenic = new ArrayList<>();
+            List<Integer> count = new ArrayList<>();
+            for (FlowEntity fe : flowEntities) {
+                scenic.add(fe.getDestination());
+                count.add(fe.getCount());
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("scenic", scenic.toArray());
+            data.put("count", count.toArray());
+
+            long endtime = System.currentTimeMillis();
+            log.info("客流分析-景点数量-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, data);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
     }
 
     /**
      * 分页 传入当前页数及要素个数
      * 返回最大值、最小值、及页面总数
-     *
-     * @param size
-     * @param pagenum
-     * @return
      */
     public Map<String, Integer> getPage(int size, int pagenum, int count) {
         //符合条件要素个数
@@ -671,7 +903,6 @@ public class DataImpl implements DataService {
     public long dateToStamp(String time) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date = simpleDateFormat.parse(time);
-        long ts = date.getTime();
-        return ts;
+        return date.getTime();
     }
 }

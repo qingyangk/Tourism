@@ -1,6 +1,8 @@
 package com.webgis.mapper;
 
 import com.webgis.entity.CommentDay;
+import com.webgis.entity.table.FlowEntity;
+import com.webgis.entity.table.SCT;
 import com.webgis.entity.ScenicDay;
 import com.webgis.entity.table.*;
 import org.apache.ibatis.annotations.Mapper;
@@ -82,9 +84,41 @@ public interface TourMapper {
     //获取评论表中的最新的时间
     List<CommentEntity> lastCom();
 
+    //根据起止日期获取每天评论数
     List<CommentDay> commentDay(String startDate, String endDate);
 
+    //根据日期获取每月景点热度
     List<ScenicDay> ScenicDay(String time);
 
+    //获取起止日期游记数
     List<CommentDay> travelDay(String startDate, String endDate);
+
+    //根据日期获取每月城市热度
+    List<ScenicDay> CityDay(String time);
+
+    //获取景点数、评论数、游记数
+    List<SCT> GetSCT();
+
+    //获取城市词云
+    List<WordCloud> GetWC(String city);
+
+    //省市流出评论数
+    List<FlowEntity> OutFlow(String cORp, String place);
+
+    //省市流入评论数
+    List<FlowEntity> PutFlow(String cORp, String place);
+
+    //省市流出平均分数
+    List<OPScore> OutScore(String cORp, String place);
+
+    //省市流入平均分数
+    List<OPScore> PutScore(String cORp, String place);
+
+    List<OPDay> OutDay(String place);
+
+    List<OPDay> PutDay(String cORp, String place);
+
+    List<FlowEntity> OutScenic(String place);
+
+    List<FlowEntity> PutScenic(String cORp, String place);
 }

@@ -121,7 +121,7 @@
     <!--查询景点经纬度-->
     <select id="queryLL" resultType="com.webgis.entity.table.ScenicEntity">
         select name, x, y
-        from scenic
+        from point
     </select>
 
     <!--查询评论坐标点-->
@@ -134,14 +134,14 @@
     <select id="getComment" resultType="com.webgis.entity.table.CommentEntity">
         select *
         from comment
-        where name = #{name} limit 0,20
+        where scenic_name = #{name} limit 0,20
     </select>
 
     <!--依据景点名称获取评论-->
     <select id="getCom" resultType="com.webgis.entity.table.CommentEntity">
         select score, release_time
         from comment
-        where name = #{name}
+        where scenic_name = #{name}
     </select>
 
     <!--南京景点推荐-->
@@ -165,74 +165,137 @@
         ORDER BY release_time DESC LIMIT 1
     </select>
 
+    <!--根据起止日期获取每天评论数-->
     <select id="commentDay" resultType="com.webgis.entity.CommentDay">
         SELECT release_time, count(*)as count, sum(score=5)as score
-        FROM 评论总表
+        FROM comment_total
+        WHERE DATE_FORMAT(release_time
+            , '%Y-%m') BETWEEN #{startDate}
+          AND #{endDate}
         GROUP BY release_time
-        HAVING DATE_FORMAT(release_time
-             , '%Y-%m') BETWEEN #{startDate}
-           AND #{endDate}
         ORDER BY release_time
     </select>
 
+    <!--根据日期获取每月景点热度-->
     <select id="ScenicDay" resultType="com.webgis.entity.ScenicDay">
-        SELECT name, count(*)as count
-        FROM comment
-        WHERE release_time =#{time}
-        GROUP BY name
-        ORDER BY count DESC
-            LIMIT 0, 10
+        SELECT name, count(name)as count,date
+        FROM compoint
+        WHERE date LIKE CONCAT(#{time}, '%')
+        GROUP BY name, date
+        ORDER BY date ASC, count DESC
     </select>
 
+    <!--获取起止日期游记数-->
     <select id="travelDay" resultType="com.webgis.entity.CommentDay">
         SELECT release_time, count(*)as count
-        FROM `游记总表`
+        FROM travel
+        WHERE DATE_FORMAT(release_time
+            , '%Y-%m') BETWEEN #{startDate}
+          AND #{endDate}
         GROUP BY release_time
-        HAVING DATE_FORMAT(release_time
-             , '%Y-%m') BETWEEN #{startDate}
-           AND #{endDate}
         ORDER BY release_time
     </select>
 
+    <!--根据日期获取每月城市热度-->
+    <select id="CityDay" resultType="com.webgis.entity.ScenicDay">
+        SELECT city as name, count(city)as count,date
+        FROM compoint
+        WHERE date LIKE CONCAT(#{time}, '%')
+        GROUP BY city, date
+        ORDER BY date ASC, count DESC
+    </select>
 
-    <select id="get1000" resultType="com.webgis.entity.table.ScenicEntity">
+    <!--获取景点数、评论数、游记数-->
+    <select id="GetSCT" resultType="com.webgis.entity.table.SCT">
+        SELECT count(*) info
+        FROM scenic_total
+        UNION
+        SELECT count(*)
+        FROM comment_total
+        UNION
+        SELECT count(*)
+        FROM travel
+    </select>
+
+    <!--获取城市词云-->
+    <select id="GetWC" resultType="com.webgis.entity.table.WordCloud">
         SELECT *
-        FROM dbo.scenicInfo
-        WHERE id = 488
+        FROM city_wordcloud
+        WHERE city = #{city}
     </select>
 
-    <select id="getForm" resultType="com.webgis.entity.table.ScenicEntity">
-        <if test="page==1">
-            SELECT TOP(9)*
-            FROM dbo.scenicInfo
-            ORDER by id
-        </if>
-        <if test="page>1">
-            SELECT top(9)*
-            FROM dbo.scenicInfo
-            WHERE id
-            NOT IN (SELECT TOP(999)id
-            FROM dbo.scenicInfo
-            ORDER by id)
-            ORDER by id
-        </if>
+    <!--省市流出评论数-->
+    <select id="OutFlow" resultType="com.webgis.entity.table.FlowEntity">
+        SELECT ${cORp} AS destination, count(*) AS count
+        FROM flow
+        WHERE author_place = #{place}
+        GROUP BY ${cORp}, author_place
+        ORDER BY count DESC
     </select>
 
-    <select id="searchForm" resultType="com.webgis.entity.table.ScenicEntity">
-        <if test="page==1">
-            SELECT TOP(#{count})*
-            FROM dbo.scenicInfo
-            WHERE Name LIKE CONCAT('%',#{model},'%')
-            ORDER by id
-        </if>
-        <if test="page>1">
-            SELECT top(#{count})*
-            FROM dbo.scenicInfo
-            WHERE Name LIKE CONCAT('%',#{model},'%')
-            id NOT IN (SELECT TOP(#{jisuan})id FROM dbo.scenicInfo ORDER by id)
-            ORDER by id
-        </if>
+    <!--省市流入评论数-->
+    <select id="PutFlow" resultType="com.webgis.entity.table.FlowEntity">
+        SELECT author_place AS destination, count(*) AS count
+        FROM flow
+        WHERE ${cORp} = #{place}
+        GROUP BY author_place, ${cORp}
+        ORDER BY count DESC
     </select>
 
+    <!--省市流出平均分数-->
+    <select id="OutScore" resultType="com.webgis.entity.table.OPScore">
+        SELECT ${cORp} AS destination, AVG(score) AS score
+        FROM flow
+        WHERE author_place = #{place}
+        GROUP BY ${cORp}
+        ORDER BY score DESC
+    </select>
+
+    <!--省市流入平均分数-->
+    <select id="PutScore" resultType="com.webgis.entity.table.OPScore">
+        SELECT author_place AS destination, AVG(score) AS score
+        FROM flow
+        WHERE ${cORp} = #{place}
+        GROUP BY author_place, ${cORp}
+        ORDER BY score DESC
+    </select>
+
+    <select id="OutDay" resultType="com.webgis.entity.table.OPDay">
+        SELECT release_time, count(*)as count
+        FROM flow
+        WHERE DATE_FORMAT(release_time
+            , '%Y-%m') BETWEEN '2019-01'
+          AND '2022-02'
+          AND author_place = #{place}
+        GROUP BY release_time
+        ORDER BY release_time
+    </select>
+
+    <select id="PutDay" resultType="com.webgis.entity.table.OPDay">
+        SELECT release_time, count(*)as count
+        FROM flow
+        WHERE DATE_FORMAT(release_time
+            , '%Y-%m') BETWEEN '2019-01'
+          AND '2022-02'
+          AND ${cORp} = #{place}
+        GROUP BY release_time
+        ORDER BY release_time
+    </select>
+
+    <select id="OutScenic" resultType="com.webgis.entity.table.FlowEntity">
+        SELECT scenic_name AS destination, count(*) count
+        FROM flow
+        WHERE author_place = #{place}
+        GROUP BY destination
+        ORDER BY count DESC
+    </select>
+
+    <select id="PutScenic" resultType="com.webgis.entity.table.FlowEntity">
+        SELECT scenic_name AS destination, count(*) count
+        FROM flow
+        WHERE ${cORp} = #{place}
+        GROUP BY destination
+        ORDER BY count DESC
+    </select>
 
 </mapper>

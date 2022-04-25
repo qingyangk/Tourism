@@ -6,4 +6,5 @@ import lombok.Data;
 public class ScenicDay {
     public String name;
     public int count;
+    public String date;
 }

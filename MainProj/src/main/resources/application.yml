@@ -52,7 +52,7 @@ spring:
 mybatis-plus:
   configuration:
     # 打印 mybatis的SQL语句，方便查看
-#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 #    # 驼峰命名法转换字段
     map-underscore-to-camel-case: true
 
