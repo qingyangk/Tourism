@@ -841,6 +841,80 @@ public class DataImpl implements DataService {
     }
 
     /**
+     * 根据特征返回榜单
+     * 传入：特征词
+     */
+    public ResponseInfo FeatureInfo(Request model) {
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("特征提取-start  ");
+
+            String label = model.getModel();
+            List<ScenicLabel> labels = tourMapper.ScenicLabel(label);
+
+
+            long endtime = System.currentTimeMillis();
+            log.info("特征提取-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, labels);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    /**
+     * 城市景点热度排行榜
+     */
+    public ResponseInfo CityScenicHot(Request model) {
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("城市景点热度-start  ");
+
+            List<ScenicEntity> scenicEntities = tourMapper.CitySH(model.getModel());
+            List<Map<String, Object>> data = new ArrayList<>();
+            for (ScenicEntity en : scenicEntities) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("name", en.getName());
+                map.put("value", en.getHot());
+                data.add(map);
+            }
+
+            long endtime = System.currentTimeMillis();
+            log.info("城市景点热度-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, data);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    /**
+     * 城市游客来源地前五
+     */
+    public ResponseInfo CitySource(Request model) {
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("城市游客来源-start  ");
+
+            List<FlowEntity> flowEntities = tourMapper.CitySource(model.getModel());
+            List<Map<String, Object>> data = new ArrayList<>();
+            for (FlowEntity en : flowEntities) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("name", en.getDestination());
+                map.put("value", en.getCount());
+                data.add(map);
+            }
+
+            long endtime = System.currentTimeMillis();
+            log.info("城市游客来源-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, data);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    /**
      * 分页 传入当前页数及要素个数
      * 返回最大值、最小值、及页面总数
      */

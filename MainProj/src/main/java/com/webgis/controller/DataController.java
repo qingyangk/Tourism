@@ -181,4 +181,19 @@ public class DataController {
     public ResponseInfo OPScenicRank(@RequestBody FlowRequest flow) {
         return dataService.OPScenicRank(flow);
     }
+
+    @PostMapping("citySH")
+    public ResponseInfo CityScenicHot(@RequestBody Request model) {
+        return dataService.CityScenicHot(model);
+    }
+
+    @PostMapping("citySource")
+    public ResponseInfo CitySource(@RequestBody Request model) {
+        return dataService.CitySource(model);
+    }
+
+    @PostMapping("featureInfo")
+    public ResponseInfo FeatureInfo(@RequestBody Request model) {
+        return dataService.FeatureInfo(model);
+    }
 }

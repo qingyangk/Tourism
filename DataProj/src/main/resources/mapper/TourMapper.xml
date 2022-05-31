@@ -97,11 +97,11 @@
         where city = #{city}
     </update>
 
-    <!--查询排名前十的城市-->
+    <!--查询排名前三十的城市-->
     <select id="cityRank" resultType="com.webgis.entity.table.CityRank">
         select *
         from cityrank
-        order by hotrank limit 0,10
+        order by hotrank limit 0,30
     </select>
 
     <!--获取点数据-->
@@ -298,4 +298,25 @@
         ORDER BY count DESC
     </select>
 
+    <select id="CitySH" resultType="com.webgis.entity.table.ScenicEntity">
+        SELECT name, hot
+        FROM info
+        WHERE city = #{city}
+        ORDER BY hot DESC LIMIT 0,25
+    </select>
+
+    <select id="CitySource" resultType="com.webgis.entity.table.FlowEntity">
+        SELECT author_place AS destination, count(*) count
+        FROM flow
+        WHERE city = #{city}
+        GROUP BY author_place
+        ORDER BY count DESC LIMIT 0, 5
+    </select>
+
+    <select id="ScenicLabel" resultType="com.webgis.entity.table.ScenicLabel">
+        SELECT scenic_name AS name, label
+        FROM scenic
+        WHERE label LIKE '%' + #{label}'%'
+        ORDER BY hot DESC
+    </select>
 </mapper>

@@ -75,12 +75,25 @@ public interface DataService extends Serializable {
      */
     ResponseInfo ScenicDay(Request model);
 
+    /**
+     * 城市每月评论热度
+     */
     ResponseInfo CityDay(Request model);
 
+    /**
+     * 景点数、评论数、游记数获取
+     */
     ResponseInfo GetSCT();
 
+    /**
+     * 获取词云
+     */
     ResponseInfo GetWordCloud(Request model);
 
+    /**
+     * 各地（省、市）流入流出量--客流分析
+     * 评论数量
+     */
     ResponseInfo OutPutPassengerFlow(FlowRequest flow);
 
     /**
@@ -100,4 +113,10 @@ public interface DataService extends Serializable {
      * 景点数量
      */
     ResponseInfo OPScenicRank(FlowRequest flow);
+
+    ResponseInfo CityScenicHot(Request model);
+
+    ResponseInfo CitySource(Request model);
+
+    ResponseInfo FeatureInfo(Request model);
 }

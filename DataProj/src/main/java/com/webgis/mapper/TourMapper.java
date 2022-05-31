@@ -121,4 +121,11 @@ public interface TourMapper {
     List<FlowEntity> OutScenic(String place);
 
     List<FlowEntity> PutScenic(String cORp, String place);
+
+    List<ScenicEntity> CitySH(String city);
+
+    List<FlowEntity> CitySource(String city);
+
+    //景点标签
+    List<ScenicLabel> ScenicLabel(String label);
 }
