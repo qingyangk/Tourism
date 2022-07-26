@@ -119,4 +119,8 @@ public interface DataService extends Serializable {
     ResponseInfo CitySource(Request model);
 
     ResponseInfo FeatureInfo(Request model);
+
+    ResponseInfo ScenicLabel(LabelEntity model);
+
+    ResponseInfo FeatureMatching(LabelEntity model);
 }

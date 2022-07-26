@@ -128,4 +128,8 @@ public interface TourMapper {
 
     //景点标签
     List<ScenicLabel> ScenicLabel(String label);
+
+    List<Map<String, Object>> SearchLabels(String labels,int type,String region);
+
+    List<Map<String, Object>> CityFeature(String labels);
 }

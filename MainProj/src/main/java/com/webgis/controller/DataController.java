@@ -196,4 +196,14 @@ public class DataController {
     public ResponseInfo FeatureInfo(@RequestBody Request model) {
         return dataService.FeatureInfo(model);
     }
+
+    @PostMapping("labelInfo")
+    public ResponseInfo ScenicLabel(@RequestBody LabelEntity model) {
+        return dataService.ScenicLabel(model);
+    }
+
+    @PostMapping("featureMatching")
+    public ResponseInfo FeatureMatching(@RequestBody LabelEntity model){
+        return dataService.FeatureMatching(model);
+    }
 }

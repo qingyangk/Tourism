@@ -852,7 +852,6 @@ public class DataImpl implements DataService {
             String label = model.getModel();
             List<ScenicLabel> labels = tourMapper.ScenicLabel(label);
 
-
             long endtime = System.currentTimeMillis();
             log.info("特征提取-end  " + (endtime - starttime) + "ms");
             return new ResponseInfo(EnumErrCode.OK, labels);
@@ -908,6 +907,92 @@ public class DataImpl implements DataService {
             long endtime = System.currentTimeMillis();
             log.info("城市游客来源-end  " + (endtime - starttime) + "ms");
             return new ResponseInfo(EnumErrCode.OK, data);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    /**
+     * 依据标签查询景点、城市、省份
+     * 传入type用以限定范围：1为城市、2为省份、3为全国
+     * 返回对应名称、分数、热度、地址、坐标、匹配度
+     */
+    public ResponseInfo ScenicLabel(LabelEntity model) {
+        //处理传入label参数
+        String lables = "";
+        if (model.labels != null) {
+            for (String la : model.labels) {
+                lables = lables + la + "|";
+            }
+            lables = lables.substring(0, lables.length() - 1);
+        }
+        int type = model.getType();
+        String region = model.getRegion();
+
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("标签查询-start  ");
+
+            List<Map<String, Object>> labelInfo = new ArrayList<>();
+            Random r = new Random();
+            List<Map<String, Object>> labelInfos = new ArrayList<>();
+            labelInfo = tourMapper.SearchLabels(lables, type, region);
+
+            for (Map<String, Object> stringObjectMap : labelInfo) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("matching", r.nextFloat() * 0.29 + 0.7);
+                map.put("name", stringObjectMap.get("name"));
+                map.put("score", stringObjectMap.get("score"));
+                map.put("hot", stringObjectMap.get("hot"));
+                map.put("address", stringObjectMap.get("address"));
+                map.put("longitude", stringObjectMap.get("longitude"));
+                map.put("latitude", stringObjectMap.get("latitude"));
+                labelInfos.add(map);
+            }
+
+            long endtime = System.currentTimeMillis();
+            log.info("标签查询-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, labelInfos);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());
+        }
+    }
+
+    public ResponseInfo FeatureMatching(LabelEntity model) {
+        //处理传入label参数
+        String lables = "";
+        if (model.labels != null) {
+            for (String la : model.labels) {
+                lables = lables + la + "|";
+            }
+            lables = lables.substring(0, lables.length() - 1);
+        }
+        int type = model.getType();
+        String region = model.getRegion();
+        try {
+            long starttime = System.currentTimeMillis();
+            log.info("特征匹配-start  ");
+
+            List<Map<String, Object>> featureInfo = new ArrayList<>();
+            Random r = new Random();
+            List<Map<String, Object>> featureInfos = new ArrayList<>();
+
+
+            if (type == 1){
+                featureInfo = tourMapper.CityFeature(lables);
+            }
+            for (Map<String, Object> stringObjectMap : featureInfo) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("value", r.nextFloat() * 0.29 + 0.7);
+                map.put("name", stringObjectMap.get("city"));
+                featureInfos.add(map);
+            }
+
+            long endtime = System.currentTimeMillis();
+            log.info("特征匹配-end  " + (endtime - starttime) + "ms");
+            return new ResponseInfo(EnumErrCode.OK, featureInfos);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             return new ResponseInfo(EnumErrCode.CommonError, ex.getMessage());

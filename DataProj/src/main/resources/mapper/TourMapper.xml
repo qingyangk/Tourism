@@ -319,4 +319,21 @@
         WHERE label LIKE '%' + #{label}'%'
         ORDER BY hot DESC
     </select>
+
+    <select id="SearchLabels" resultType="map">
+        SELECT scenic_name AS name, score, hot,address,longitude,latitude
+        FROM scenic
+        <if test="type==1">WHERE city = #{region}</if>
+        <if test="type==2">WHERE province = #{region}</if>
+        <if test="labels != '' and type!=3">AND label REGEXP (#{labels})</if>
+        <if test="labels != '' and type==3">WHERE label REGEXP (#{labels})</if>
+        ORDER BY hot DESC
+    </select>
+
+    <select id="CityFeature" resultType="map">
+        SELECT id, city, word
+        FROM city_wordcloud
+        WHERE word REGEXP (#{labels})
+        LIMIT 0,10
+    </select>
 </mapper>
